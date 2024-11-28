@@ -37,11 +37,11 @@ def interface():
         screen.blit(text_surface2, (x - text_surface2.get_width() // 2, y - total_height // 2 + font.get_linesize()))
 
     # Other text definitions
-    rules_text = segoeuiblack_font.render("Rules", True, white)
-    options_text = segoeuiblack_font.render("Options", True, white)
-    credits_text = segoeuiblack_font.render("Credits", True, white)
-    quit_text = segoeuiblack_font.render("Quit", True, white)
-    title_text = segoeuiblack_font.render("Computation III - Project", True, glowing_light_red)
+    rules_text =  stencil_font.render("Rules", True, white)
+    options_text =  stencil_font.render("Options", True, white)
+    credits_text =  stencil_font.render("Credits", True, white)
+    quit_text =  stencil_font.render("Quit", True, white)
+    title_text =  stencil_font.render("Computation III - Project", True, glowing_light_red)
 
     # Main game loop
     while True:
@@ -56,6 +56,9 @@ def interface():
                     pygame.quit()
 
                 if 90 <= mouse[0] <= 230 and 480 <= mouse[1] <= 540:
+                    under_construction()
+
+                if 90 <= mouse[0] <= 230 and 600 <= mouse[1] <= 660:
                     under_construction()
 
                 if 90 <= mouse[0] <= 630 and 240 <= mouse[1] <= 300:
@@ -103,3 +106,61 @@ def interface():
         pygame.display.update()
 
 
+# Under construction screen
+
+
+def credits_():
+    screen = pygame.display.set_mode(resolution)
+
+    # fonts
+    stencil_font = pygame.font.SysFont("stencil", 40)
+    ocraextended_font = pygame.font.SysFont("ocraextended", 40)
+
+    # text
+    joao =  ocraextended_font.render("João Santos", True, white)
+    joao_mail =  ocraextended_font.render("20231697@novaims.unl.pt", True, white)
+    marta = ocraextended_font.render("Marta Dias", True, white)
+    marta_mail = ocraextended_font.render("20231642@novaims.unl.pt", True, white)
+    rita = ocraextended_font.render("Rita Pinto",True, white)
+    rita_mail = ocraextended_font.render("20231664@novaims.unl.pt", True, white)
+
+    # main game loop
+    while True:
+        # mouse information
+        mouse = pygame.mouse.get_pos()
+
+        # check for events
+        for ev in pygame.event.get():
+            if ev.type == pygame.QUIT:
+                pygame.quit()
+            if ev.type == pygame.MOUSEBUTTONDOWN:
+                if 450 <= mouse[0] <= 590 and 600 <= mouse[1] <= 660:
+                    interface()
+
+        # background
+        screen.fill(deep_black)
+
+        # display text
+        screen.blit(joao, (0, 0))
+        screen.blit(joao_mail, (0, 50))
+        screen.blit(marta, (0, 130))
+        screen.blit(marta_mail, (0, 180))
+        screen.blit(rita, (0, 260))
+        screen.blit(rita_mail, (0, 310))
+
+        # draw a back button [x, y, width, height]
+        pygame.draw.rect(screen, dark_red, [450, 600, 140, 60])
+        back_text = stencil_font.render("    back", True, white)
+        back_rect = back_text.get_rect(center=(450 + 140 // 2, 600 + 60 // 2))
+        screen.blit(back_text, back_rect)
+
+        # Update the screen
+        pygame.display.update()
+
+
+def rules_():
+    print("Displaying rules...")
+
+
+def wilderness_explorer():
+    game_loop()
