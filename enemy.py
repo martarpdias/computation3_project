@@ -1,5 +1,6 @@
 from utils import *
 from config import *
+from bullet import Bullet
 import pygame
 import math
 import random
@@ -44,5 +45,31 @@ class Enemy(pygame.sprite.Sprite):
 
         self.rect.x =int(self.rect.x)
         self.rect.y =int(self.rect.y)
+
+class fast_enemy(Enemy):
+    def __init__(self):
+        """
+        Initialize the enemy instance
+        """
+        super().__init__()
+        #change the appearence
+        self.image.fill(blue)
+
+        #Random speed
+        self.speed = random.randint(4, 5)
+        #Health
+        self.health = 10
+
+class shooter_rastreio(Enemy):
+    def __init__(self):
+        super().__init__()
+        self.image.fill(pink)
+        self.health = 50
+    
+    def shoot(self, player):
+        bullet = Bullet(self.rect.centerx, self.rect.centery, direction)
+        
+
+
 
 

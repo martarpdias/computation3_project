@@ -10,6 +10,7 @@ red = (255, 0, 0)  # Red for errors
 green = (0, 255, 0)  # Green for success
 blue = (0, 0, 255)  # Blue for information
 yellow = (255, 255, 0)  # Yellow for warnings
+pink = (255, 192, 203)  # Pinkdi pink pink
 
 
 # SCREEN RESOLUTION
