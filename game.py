@@ -6,6 +6,9 @@ import random
 from shed import shed
 from enemy import Enemy
 from player import Player
+from invicibility import Invincibility
+from deSpawner import DeSpawner
+from velocity import Velocity
 
 def game_loop():
     player = Player()
@@ -163,9 +166,52 @@ def execute_game(player: Player):
             pygame.draw.rect(screen, (255, 0, 0), (enemy.rect.x, enemy.rect.y - 10, 50, 5))  # Background bar
             pygame.draw.rect(screen, (0, 255, 0), (enemy.rect.x, enemy.rect.y - 10, enemy_health_bar_width, 5))  # Enemy health bar
 
-        
+        # Display the score
         score_text = font.render(f"Score: {score}", True, (255, 255, 255))  # White text
         screen.blit(score_text, (295, 45))  # Display the score at the top-left corner
+
+        #power ups
+        power_ups = pygame.sprite.Group()
+        power_up_spawn_timer = 0  # Timer for spawning power-ups
+
+        # Spawning power-ups
+        if power_up_spawn_timer <= 0:
+            if random.random() < 0.2:  # 10% chance every cycle
+                x, y = random.randint(50, width - 50), random.randint(50, height - 50)
+                if random.random() < 0.33:  # 33% chance for Invincibility
+                    new_power_up = Invincibility(x, y)
+                elif random.random() < 0.66:  # 33% chance for Velocity
+                    new_power_up = Velocity(x, y)
+                else:  # 33% chance for DeSpawner
+                    new_power_up = DeSpawner(x, y)
+                power_ups.add(new_power_up)
+            power_up_spawn_timer = fps * 5  # 5 seconds until next spawn
+        power_up_spawn_timer -= 1
+
+        # Checking for collisions with the player and power-ups
+        collided_power_ups = pygame.sprite.spritecollide(player, power_ups, True)
+        for power_up in collided_power_ups:
+            power_up.start_time = pygame.time.get_ticks()
+            power_up.affect_player(player)
+            power_up.affect_game({
+                "enemies": enemies,
+                "enemy_spawn_rate": enemy_spawn_rate
+            })
+            player.active_power_up = power_up  # Track the active power-up
+
+        # Handle active power-ups
+        if player.active_power_up:
+            if player.active_power_up.is_expired():
+                # Remove effects
+                if isinstance(player.active_power_up, Invincibility):
+                    player.invincible = False
+                    player.image.fill(blue)  # Revert player color
+                elif isinstance(player.active_power_up, DeSpawner):
+                    enemy_spawn_rate = fps * 2  # Reset spawn rate
+                elif isinstance(player.active_power_up, Velocity):
+                    player.speed = 5  # Reset player speed
+                player.active_power_up = None
+
 
         # Update the display
         pygame.display.flip()
