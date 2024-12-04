@@ -43,7 +43,7 @@ def execute_game(player: Player):
 
     # Round management
     current_round = 1
-    round_time = 15  # seconds per round
+    round_time = 90  # seconds per round
     start_time = pygame.time.get_ticks()  # Get initial time for the round
     enemy_spawn_rate = fps * 2  # Initial spawn rate (every 2 seconds)
 
@@ -72,13 +72,13 @@ def execute_game(player: Player):
             bar_color = (255, 0, 0)  # Red
 
         # Add rounded corners to the time bar
-        pygame.draw.rect(screen, (255, 255, 255), (20, 600, width-40, 25), border_radius=10)  # Draw a background bar
-        pygame.draw.rect(screen, bar_color, (30, 605, bar_width, 15), border_radius=10)  # Time bar with rounded corners
+        pygame.draw.rect(screen, (255, 255, 255), (20, height-40, width-40, 25), border_radius=10)  # Draw a background bar
+        pygame.draw.rect(screen, bar_color, (30, height-35, bar_width, 15), border_radius=10)  # Time bar with rounded corners
 
         # Display the numerical time remaining
         font = pygame.font.SysFont("segoeuiblack", 20)
         time_text = font.render(f"Time: {int(time_left)}s", True, (255, 255, 255))
-        screen.blit(time_text, (width - 120, 570))
+        screen.blit(time_text, (25, height - 70))
 
         if elapsed_time >= round_time:
             # Show transition screen
@@ -90,17 +90,19 @@ def execute_game(player: Player):
 
         # Display round number
         round_text = font.render(f"Round: {current_round}", True, (255, 255, 255))
-        screen.blit(round_text, (20, 570))
+        screen.blit(round_text, (160, 45))
 
         # Draw player health bar
         player_health_bar_width = int((player.health/100) * (width/3))  # Scale health to a thrid of the screen width
-        pygame.draw.rect(screen, (255, 0, 0), (20, 0, (width/3), 20), border_radius=10)  # Background for the health bar
-        pygame.draw.rect(screen, (0, 255, 0), (20, 0, player_health_bar_width, 20), border_radius = 10)  # Player health bar
+        pygame.draw.rect(screen, (255, 0, 0), (15, 20, (width/3), 20), border_radius=10)  # Background for the health bar
+        pygame.draw.rect(screen, (0, 255, 0), (15, 20, player_health_bar_width, 20), border_radius = 10)  # Player health bar
+        if player.health <= 0:
+            show_game_over_screen(screen)
 
         # Display the numerical life remaining
         font = pygame.font.SysFont("segoeuiblack", 20)
         life_text = font.render(f"Life: {int(player.health)}%", True, (255, 255, 255))
-        screen.blit(life_text, (20, 30))
+        screen.blit(life_text, (25, 45))
 
         # Event handling
         for event in pygame.event.get():
@@ -163,7 +165,7 @@ def execute_game(player: Player):
 
         
         score_text = font.render(f"Score: {score}", True, (255, 255, 255))  # White text
-        screen.blit(score_text, (150, 30))  # Display the score at the top-left corner
+        screen.blit(score_text, (295, 45))  # Display the score at the top-left corner
 
         # Update the display
         pygame.display.flip()
@@ -183,4 +185,21 @@ def show_transition_screen(screen):
     pygame.time.wait(2000)  # Wait for 2 seconds
 
 
+def show_game_over_screen(screen):
+    """
+    Displays a game over screen with a message and waits for the player to close the window.
+    """
+    screen = pygame.display.set_mode(resolution)
+    screen.fill((0, 0, 0))  # Fill the screen with black
 
+    segoeuiblack_font = pygame.font.SysFont("segoeuiblack", 50)
+    text = segoeuiblack_font.render("Game Over!", True, (255, 255, 255))
+    text_rect = text.get_rect(center=(width // 2, height // 2))
+    screen.blit(text, text_rect)
+    pygame.display.update()
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                return
