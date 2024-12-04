@@ -26,16 +26,16 @@ class Player(pygame.sprite.Sprite):
         """
         keys=pygame.key.get_pressed()
         #Moving upwards
-        if keys[pygame.K_w] and self.rect.top>0:
+        if (keys[pygame.K_UP] or keys[pygame.K_w]) and self.rect.top>0:
             self.rect.y-= self.speed
         #Moving downwards
-        if keys[pygame.K_s] and self.rect.bottom<height:
+        if (keys[pygame.K_DOWN] or keys[pygame.K_s]) and self.rect.bottom<height:
             self.rect.y+= self.speed
         #Moving left
-        if keys[pygame.K_a] and self.rect.left>0:
+        if (keys[pygame.K_LEFT] or keys[pygame.K_a]) and self.rect.left>0:
             self.rect.x-= self.speed
         #Moving right
-        if keys[pygame.K_d] and self.rect.right<width:
+        if (keys[pygame.K_RIGHT] or keys[pygame.K_d]) and self.rect.right<width:
             self.rect.x+= self.speed
 
 
