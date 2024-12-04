@@ -61,7 +61,7 @@ def execute_game(player: Player):
         time_left = max(0, round_time - elapsed_time)
 
         # Calculate the width of the time bar
-        bar_width = int((time_left / round_time) * width)  # Proportional to remaining time
+        bar_width = int((time_left / round_time) * width-40)  # Proportional to remaining time
 
         # Set the color of the time bar (optional: green -> yellow -> red transition)
         if time_left > round_time * 0.5:
@@ -72,13 +72,13 @@ def execute_game(player: Player):
             bar_color = (255, 0, 0)  # Red
 
         # Add rounded corners to the time bar
-        pygame.draw.rect(screen, (255, 255, 255), (20, 0, width-40, 25), border_radius=10)  # Draw a background bar
-        pygame.draw.rect(screen, bar_color, (30, 5, bar_width - 50, 15), border_radius=10)  # Time bar with rounded corners
+        pygame.draw.rect(screen, (255, 255, 255), (20, 600, width-40, 25), border_radius=10)  # Draw a background bar
+        pygame.draw.rect(screen, bar_color, (30, 605, bar_width, 15), border_radius=10)  # Time bar with rounded corners
 
         # Display the numerical time remaining
         font = pygame.font.SysFont("segoeuiblack", 20)
         time_text = font.render(f"Time: {int(time_left)}s", True, (255, 255, 255))
-        screen.blit(time_text, (width - 120, 25))
+        screen.blit(time_text, (width - 120, 570))
 
         if elapsed_time >= round_time:
             # Show transition screen
@@ -90,17 +90,17 @@ def execute_game(player: Player):
 
         # Display round number
         round_text = font.render(f"Round: {current_round}", True, (255, 255, 255))
-        screen.blit(round_text, (20, 25))
+        screen.blit(round_text, (20, 570))
 
         # Draw player health bar
         player_health_bar_width = int((player.health/100) * (width/3))  # Scale health to a thrid of the screen width
-        pygame.draw.rect(screen, (255, 0, 0), (20, 600, (width/3), 20), border_radius=10)  # Background for the health bar
-        pygame.draw.rect(screen, (0, 255, 0), (20, 600, player_health_bar_width, 20), border_radius = 10)  # Player health bar
+        pygame.draw.rect(screen, (255, 0, 0), (20, 0, (width/3), 20), border_radius=10)  # Background for the health bar
+        pygame.draw.rect(screen, (0, 255, 0), (20, 0, player_health_bar_width, 20), border_radius = 10)  # Player health bar
 
         # Display the numerical life remaining
         font = pygame.font.SysFont("segoeuiblack", 20)
         life_text = font.render(f"Life: {int(player.health)}%", True, (255, 255, 255))
-        screen.blit(life_text, (20, 570))
+        screen.blit(life_text, (20, 30))
 
         # Event handling
         for event in pygame.event.get():
@@ -112,7 +112,7 @@ def execute_game(player: Player):
 
         # Spawning the enemies
         if enemy_spawn_timer <= 0:
-            new_enemy = Enemy(2, 10, enemy_size, (255, 0, 0))  # Use default enemy stats
+            new_enemy = Enemy()  # Use default enemy stats
             enemies.add(new_enemy)
             enemy_spawn_timer = enemy_spawn_rate
 
@@ -163,7 +163,7 @@ def execute_game(player: Player):
 
         
         score_text = font.render(f"Score: {score}", True, (255, 255, 255))  # White text
-        screen.blit(score_text, (150, 570))  # Display the score at the top-left corner
+        screen.blit(score_text, (150, 30))  # Display the score at the top-left corner
 
         # Update the display
         pygame.display.flip()
