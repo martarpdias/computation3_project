@@ -1,11 +1,13 @@
 from config import *
 import math
 import pygame
+import random
 
 
 from shed import shed
-from enemy import Enemy 
+from enemy import *
 from player import Player
+from bullet import Bullet
 
 
 
@@ -45,10 +47,11 @@ def execute_game(player:Player):
 
     #Initialize bullets
     bullets=pygame.sprite.Group()
+    enemy_bullets=pygame.sprite.Group()
 
     #initialize the enemy group
     enemies=pygame.sprite.Group()
-    enemy_spawn_timer=0
+    enemy_spawn_timer= fps *2 #every two seconds
 
 
     running=True
@@ -63,13 +66,19 @@ def execute_game(player:Player):
             if event.type==pygame.QUIT:
                 pygame.quit()
 
+        for enemy in enemies:
+            if isinstance(enemy, shooter_rastreio):
+                enemy.shoot(enemy_bullets, player)
+                pass
+
         #shooting
         player.shoot(bullets)
 
 
         #spawning the enemies
         if enemy_spawn_timer<=0:
-            new_enemy=Enemy()
+            enemy_type = random.choice([Enemy, fast_enemy, shooter_rastreio])
+            new_enemy = enemy_type()
             enemies.add(new_enemy)
             enemy_spawn_timer=fps*2 #every two seconds
 
@@ -91,6 +100,7 @@ def execute_game(player:Player):
         player_group.update()
         bullets.update()
         enemies.update(player)
+        enemy_bullets.update()
 
         #checking if the user goes into the shed area
         if player.rect.right >= width:
@@ -104,6 +114,8 @@ def execute_game(player:Player):
         player_group.draw(screen)
         enemies.draw(screen)
         for bullet in bullets:
+            bullet.draw(screen)
+        for bullet in enemy_bullets:
             bullet.draw(screen)
 
 
