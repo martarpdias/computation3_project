@@ -19,6 +19,8 @@ class Player(pygame.sprite.Sprite):
         self.speed=5
         self.health=100
         self.bullet_cooldown=0
+        self.invincible = False  # To handle invincibility
+        self.active_power_up = None  # Currently active power-up
 
     def update(self):
         """

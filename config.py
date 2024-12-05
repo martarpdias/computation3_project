@@ -14,7 +14,7 @@ pink = (255, 192, 203)  # Pinkdi pink pink
 
 
 # SCREEN RESOLUTION
-resolution = (720, 720)
+resolution = (1200, 600)
 width, height = resolution[0], resolution[1] #for calculation
 fps=60
 
