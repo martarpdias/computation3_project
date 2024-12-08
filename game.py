@@ -138,37 +138,6 @@ def execute_game(player: Player):
         # Check collisions between player and enemies
         collided_enemies = pygame.sprite.spritecollide(player, enemies, False)
         for enemy in collided_enemies:
-            player.health -= 5
-            enemy.kill()
-
-        # Check if the player is dead
-        if player.health <= 0:
-            print("game_over")
-
-        # Checking if the user goes into the shed area
-        if player.rect.right >= width:
-            # Change the game state to shed
-            return "shed"
-
-        # Draw game objects
-        player_group.draw(screen)
-        enemies.draw(screen)
-        for bullet in bullets:
-            bullet.draw(screen)
-
-        # Draw health bars for enemies
-        for enemy in enemies:
-            enemy_health_bar_width = int((enemy.health / 10) * 50)  # Scale enemy health to a width of 50
-            pygame.draw.rect(screen, (255, 0, 0), (enemy.rect.x, enemy.rect.y - 10, 50, 5))  # Background bar
-            pygame.draw.rect(screen, (0, 255, 0), (enemy.rect.x, enemy.rect.y - 10, enemy_health_bar_width, 5))  # Enemy health bar
-
-        # Display the score
-        score_text = font.render(f"Score: {score}", True, (255, 255, 255))  # White text
-        screen.blit(score_text, (295, 45))  # Display the score at the top-left corner
-
-        #power ups
-        power_ups = pygame.sprite.Group()
-        power_up_spawn_timer = 0  # Timer for spawning power-ups
             if not player.invincible:  # Player takes damage only if not invincible
                 player.health -= 5
                 enemy.kill()
