@@ -4,7 +4,7 @@ import pygame
 import random
 
 from shed import shed
-from enemy import Enemy
+from enemy import *
 from player import Player
 from invicibility import Invincibility
 from deSpawner import DeSpawner
@@ -38,12 +38,13 @@ def execute_game(player: Player):
     player_group.add(player)
     score = 0
 
-    # Initialize bullets
-    bullets = pygame.sprite.Group()
+    #Initialize bullets
+    bullets=pygame.sprite.Group()
+    enemy_bullets=pygame.sprite.Group()
 
     # Initialize the enemy group
     enemies = pygame.sprite.Group()
-    enemy_spawn_timer = 0
+    enemy_spawn_timer = fps * 2
 
     # Initialize power-ups
     power_ups = pygame.sprite.Group()
@@ -113,27 +114,30 @@ def execute_game(player: Player):
             if event.type == pygame.QUIT:
                 pygame.quit()
 
-        # Shooting
+        for enemy in enemies:
+            if isinstance(enemy, shooter_rastreio):
+                enemy.shoot(enemy_bullets, player)
+                pass
+
+        #shooting
         player.shoot(bullets)
 
-        # Spawning the enemies
-        if enemy_spawn_timer <= 0:
-            new_enemy = Enemy()  # Use default enemy stats
+
+        #spawning the enemies
+        if enemy_spawn_timer<=0:
+            enemy_type = random.choice([Enemy, fast_enemy, shooter_rastreio])
+            new_enemy = enemy_type()
             enemies.add(new_enemy)
             enemy_spawn_timer = enemy_spawn_rate
 
         # Update the enemy spawn timer
         enemy_spawn_timer -= 1
 
-        # Check collisions between bullets and enemies
-        for bullet in bullets:
-            collided_enemies = pygame.sprite.spritecollide(bullet, enemies, False)
-            for enemy in collided_enemies:
-                enemy.health -= 5  # Reduce enemy health
-                bullet.kill()  # Remove the bullet
-                if enemy.health <= 0:
-                    enemy.kill()
-                    score += 100
+        # Update positions
+        player_group.update()
+        bullets.update()
+        enemies.update(player)
+        enemy_bullets.update()
 
         # Check collisions between player and enemies
         collided_enemies = pygame.sprite.spritecollide(player, enemies, False)
@@ -155,6 +159,8 @@ def execute_game(player: Player):
         player_group.draw(screen)
         enemies.draw(screen)
         for bullet in bullets:
+            bullet.draw(screen)
+        for bullet in enemy_bullets:
             bullet.draw(screen)
 
         # Draw health bars for enemies
