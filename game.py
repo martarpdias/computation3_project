@@ -9,6 +9,7 @@ from player import Player
 from invicibility import Invincibility
 from deSpawner import DeSpawner
 from velocity import Velocity
+from bullet import Bullet  # Ensure this imports your `Bullet` class
 
 def game_loop():
     player = Player()
@@ -44,12 +45,15 @@ def execute_game(player: Player):
     enemies = pygame.sprite.Group()
     enemy_spawn_timer = 0
 
+    # Initialize power-ups
+    power_ups = pygame.sprite.Group()
+    power_up_spawn_timer = 0
+
     # Round management
     current_round = 1
     round_time = 90  # seconds per round
     start_time = pygame.time.get_ticks()  # Get initial time for the round
     enemy_spawn_rate = fps * 2  # Initial spawn rate (every 2 seconds)
-
 
     running = True
     while running:
@@ -64,7 +68,7 @@ def execute_game(player: Player):
         time_left = max(0, round_time - elapsed_time)
 
         # Calculate the width of the time bar
-        bar_width = int((time_left / round_time) * width-40)  # Proportional to remaining time
+        bar_width = int((time_left / round_time) * (width - 40))  # Proportional to remaining time
 
         # Set the color of the time bar (optional: green -> yellow -> red transition)
         if time_left > round_time * 0.5:
@@ -75,8 +79,8 @@ def execute_game(player: Player):
             bar_color = (255, 0, 0)  # Red
 
         # Add rounded corners to the time bar
-        pygame.draw.rect(screen, (255, 255, 255), (20, height-40, width-40, 25), border_radius=10)  # Draw a background bar
-        pygame.draw.rect(screen, bar_color, (30, height-35, bar_width, 15), border_radius=10)  # Time bar with rounded corners
+        pygame.draw.rect(screen, (255, 255, 255), (20, height - 40, width - 40, 25), border_radius=10)  # Background bar
+        pygame.draw.rect(screen, bar_color, (30, height - 35, bar_width, 15), border_radius=10)  # Time bar with rounded corners
 
         # Display the numerical time remaining
         font = pygame.font.SysFont("segoeuiblack", 20)
@@ -96,14 +100,11 @@ def execute_game(player: Player):
         screen.blit(round_text, (160, 45))
 
         # Draw player health bar
-        player_health_bar_width = int((player.health/100) * (width/3))  # Scale health to a thrid of the screen width
-        pygame.draw.rect(screen, (255, 0, 0), (15, 20, (width/3), 20), border_radius=10)  # Background for the health bar
-        pygame.draw.rect(screen, (0, 255, 0), (15, 20, player_health_bar_width, 20), border_radius = 10)  # Player health bar
-        if player.health <= 0:
-            show_game_over_screen(screen)
+        player_health_bar_width = int((player.health / 100) * (width / 3))  # Scale health to a third of the screen width
+        pygame.draw.rect(screen, (255, 0, 0), (15, 20, (width / 3), 20), border_radius=10)  # Background for the health bar
+        pygame.draw.rect(screen, (0, 255, 0), (15, 20, player_health_bar_width, 20), border_radius=10)  # Player health bar
 
         # Display the numerical life remaining
-        font = pygame.font.SysFont("segoeuiblack", 20)
         life_text = font.render(f"Life: {int(player.health)}%", True, (255, 255, 255))
         screen.blit(life_text, (25, 45))
 
@@ -121,25 +122,20 @@ def execute_game(player: Player):
             enemies.add(new_enemy)
             enemy_spawn_timer = enemy_spawn_rate
 
-        # Checking for collisions between bullets and enemies
-        for bullet in bullets:
-            collided_enemies = pygame.sprite.spritecollide(bullet, enemies, False)
-            for enemy in collided_enemies:
-                enemy.health -= 5  # Decrease health by 5 for each hit
-                bullet.kill()  # Destroy the bullet
-                if enemy.health <= 0:
-                    enemy.kill()  # Destroy the enemy
-                    score += 100
-
         # Update the enemy spawn timer
         enemy_spawn_timer -= 1
 
-        # Update positions
-        player_group.update()
-        bullets.update()
-        enemies.update(player)
+        # Check collisions between bullets and enemies
+        for bullet in bullets:
+            collided_enemies = pygame.sprite.spritecollide(bullet, enemies, False)
+            for enemy in collided_enemies:
+                enemy.health -= 5  # Reduce enemy health
+                bullet.kill()  # Remove the bullet
+                if enemy.health <= 0:
+                    enemy.kill()
+                    score += 100
 
-        #check for colission btween player and enemies
+        # Check collisions between player and enemies
         collided_enemies = pygame.sprite.spritecollide(player, enemies, False)
         for enemy in collided_enemies:
             player.health -= 5
@@ -173,22 +169,25 @@ def execute_game(player: Player):
         #power ups
         power_ups = pygame.sprite.Group()
         power_up_spawn_timer = 0  # Timer for spawning power-ups
+            if not player.invincible:  # Player takes damage only if not invincible
+                player.health -= 5
+                enemy.kill()
 
         # Spawning power-ups
         if power_up_spawn_timer <= 0:
-            if random.random() < 0.2:  # 10% chance every cycle
+            if random.random() < 0.2:  # 20% chance each frame
                 x, y = random.randint(50, width - 50), random.randint(50, height - 50)
-                if random.random() < 0.33:  # 33% chance for Invincibility
-                    new_power_up = Invincibility(x, y)
-                elif random.random() < 0.66:  # 33% chance for Velocity
-                    new_power_up = Velocity(x, y)
-                else:  # 33% chance for DeSpawner
-                    new_power_up = DeSpawner(x, y)
+                if random.random() < 0.33:
+                    new_power_up = Invincibility(x, y, duration=5)
+                elif random.random() < 0.66:
+                    new_power_up = Velocity(x, y, duration=5)
+                else:
+                    new_power_up = DeSpawner(x, y, duration=5)
                 power_ups.add(new_power_up)
-            power_up_spawn_timer = fps * 5  # 5 seconds until next spawn
+            power_up_spawn_timer = fps * 5
         power_up_spawn_timer -= 1
 
-        # Checking for collisions with the player and power-ups
+        # Check for collisions between the player and power-ups
         collided_power_ups = pygame.sprite.spritecollide(player, power_ups, True)
         for power_up in collided_power_ups:
             power_up.start_time = pygame.time.get_ticks()
@@ -197,49 +196,46 @@ def execute_game(player: Player):
                 "enemies": enemies,
                 "enemy_spawn_rate": enemy_spawn_rate
             })
-            player.active_power_up = power_up  # Track the active power-up
+            player.active_power_up = power_up
 
-        # Handle active power-ups
-        if player.active_power_up:
-            if player.active_power_up.is_expired():
-                # Remove effects
-                if isinstance(player.active_power_up, Invincibility):
-                    player.invincible = False
-                    player.image.fill(blue)  # Revert player color
-                elif isinstance(player.active_power_up, DeSpawner):
-                    enemy_spawn_rate = fps * 2  # Reset spawn rate
-                elif isinstance(player.active_power_up, Velocity):
-                    player.speed = 5  # Reset player speed
-                player.active_power_up = None
+        # Handle active power-up
+        if player.active_power_up and player.active_power_up.is_expired():
+            player.active_power_up.remove_effects(player, {"enemy_spawn_rate": fps * 2})
+            player.active_power_up = None
 
+        # Update groups
+        player_group.update()
+        bullets.update()
+        enemies.update(player)
+        power_ups.update()
+
+        # Draw objects
+        player_group.draw(screen)
+        enemies.draw(screen)
+        power_ups.draw(screen)
+        for bullet in bullets:
+            bullet.draw(screen)
+
+        # Display the score
+        score_text = font.render(f"Score: {score}", True, (255, 255, 255))
+        screen.blit(score_text, (295, 45))
 
         # Update the display
         pygame.display.flip()
 
-
 def show_transition_screen(screen):
-    """
-    Displays a black screen for 2 seconds as a transition between rounds.
-    """
-    screen.fill((0, 0, 0))  # Fill the screen with black
-
-    segoeuiblack_font = pygame.font.SysFont("segoeuiblack", 50)
-    text = segoeuiblack_font.render("Round completed!", True, (255, 255, 255))
+    screen.fill((0, 0, 0))
+    font = pygame.font.SysFont("segoeuiblack", 50)
+    text = font.render("Round completed!", True, (255, 255, 255))
     text_rect = text.get_rect(center=(width // 2, height // 2))
     screen.blit(text, text_rect)
     pygame.display.update()
-    pygame.time.wait(2000)  # Wait for 2 seconds
-
+    pygame.time.wait(2000)
 
 def show_game_over_screen(screen):
-    """
-    Displays a game over screen with a message and waits for the player to close the window.
-    """
-    screen = pygame.display.set_mode(resolution)
-    screen.fill((0, 0, 0))  # Fill the screen with black
-
-    segoeuiblack_font = pygame.font.SysFont("segoeuiblack", 50)
-    text = segoeuiblack_font.render("Game Over!", True, (255, 255, 255))
+    screen.fill((0, 0, 0))
+    font = pygame.font.SysFont("segoeuiblack", 50)
+    text = font.render("Game Over!", True, (255, 255, 255))
     text_rect = text.get_rect(center=(width // 2, height // 2))
     screen.blit(text, text_rect)
     pygame.display.update()
