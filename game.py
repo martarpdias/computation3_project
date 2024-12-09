@@ -140,6 +140,16 @@ def execute_game(player: Player):
                     enemy.kill()  # Destroy the enemy
                     score += 100
 
+        # Checking for collisions between bullets and players
+        for bullet in enemy_bullets:
+            collided_player = pygame.sprite.spritecollideany(bullet, player_group)
+            if collided_player:
+                player.health -= 5  # Decrease health by 5 for each hit
+                bullet.kill()  # Destroy the bullet
+                if player.health <= 0:
+                    player.kill()  # Destroy the player
+                    score += 100
+
         # Update the enemy spawn timer
         enemy_spawn_timer -= 1
 
@@ -151,9 +161,10 @@ def execute_game(player: Player):
 
         #check for colission btween player and enemies
         collided_enemies = pygame.sprite.spritecollide(player, enemies, False)
+        damage = 5
         for enemy in collided_enemies:
-            player.health -= 5
-            enemy.kill()
+            player.take_damage(enemy.damage)
+            
 
         # Check if the player is dead
         if player.health <= 0:
@@ -173,8 +184,9 @@ def execute_game(player: Player):
             bullet.draw(screen)
 
         # Draw health bars for enemies
+        enemy_health_bar_max_width = 50  # Maximum width of the health bar
         for enemy in enemies:
-            enemy_health_bar_width = int((enemy.health / 10) * 50)  # Scale enemy health to a width of 50
+            enemy_health_bar_width = int((enemy.health / enemy.max_health) * enemy_health_bar_max_width)  # Scale enemy health to the max width
             pygame.draw.rect(screen, (255, 0, 0), (enemy.rect.x, enemy.rect.y - 10, 50, 5))  # Background bar
             pygame.draw.rect(screen, (0, 255, 0), (enemy.rect.x, enemy.rect.y - 10, enemy_health_bar_width, 5))  # Enemy health bar
 
@@ -182,6 +194,9 @@ def execute_game(player: Player):
         score_text = font.render(f"Score: {score}", True, (255, 255, 255))  # White text
         screen.blit(score_text, (295, 45))  # Display the score at the top-left corner
 
+        # Update the display
+        pygame.display.flip()
+'''
         #power ups
         power_ups = pygame.sprite.Group()
         power_up_spawn_timer = 0  # Timer for spawning power-ups
@@ -223,12 +238,11 @@ def execute_game(player: Player):
                 elif isinstance(player.active_power_up, Velocity):
                     player.speed = 5  # Reset player speed
                 player.active_power_up = None
+'''
 
 
-        # Update the display
-        pygame.display.flip()
-
-
+    
+    
 def show_transition_screen(screen):
     """
     Displays a black screen for 2 seconds as a transition between rounds.

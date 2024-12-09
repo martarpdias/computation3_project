@@ -27,6 +27,9 @@ class Enemy(pygame.sprite.Sprite):
         self.speed = random.randint(2, 3)
         #Health
         self.health=10
+        self.max_health = self.health
+        #damage it deals
+        self.damage = 5
 
     def update(self,player):
         """
@@ -62,12 +65,15 @@ class fast_enemy(Enemy):
         self.speed = random.randint(4, 5)
         #Health
         self.health = 10
+        #damage it deals
+        self.damage = 5
 
 class shooter_rastreio(Enemy):
     def __init__(self):
         super().__init__()
         self.image.fill(pink)
         self.health = 50
+        self.max_health = self.health
         self.shoot_cooldown = 0
         
     
