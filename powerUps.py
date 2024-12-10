@@ -11,8 +11,10 @@ class PowerUp(pygame.sprite.Sprite, ABC):
         self.rect = self.image.get_rect(center=(x, y))
         self.create_glow()
 
-        self.duration = 5  # Duration in seconds
-        self.start_time = pygame.time.get_ticks()  # Set start time when created
+        self.duration_before_use = 10  # Duration the power-up is visible (10 seconds)
+        self.duration_use = 7  # Duration after collision (7 seconds)
+        self.start_time_before_use = pygame.time.get_ticks()  # Start time for visibility
+        self.start_time_use = None  # Start time for usage (set on collision)
 
     def create_glow(self):
         """Create the glowing circle effect."""
@@ -52,10 +54,12 @@ class PowerUp(pygame.sprite.Sprite, ABC):
         self.image.fill((0, 0, 0, 0))  # Clear the previous surface
         self.create_glow()  # Redraw the glow with the new radius
 
-
     def is_expired(self):
-        """Check if the power-up duration has expired."""
-        return pygame.time.get_ticks() - self.start_time > self.duration * 1000
+        """Check if the power-up duration before collision has expired (10 seconds)."""
+        return pygame.time.get_ticks() - self.start_time_before_use > self.duration_before_use * 1000
 
-
-
+    def use_expired(self):
+        """Check if the power-up usage duration has expired (7 seconds after collection)."""
+        if self.start_time_use is None:  # No start time means it hasn't been collected
+            return False
+        return pygame.time.get_ticks() - self.start_time_use > self.duration_use * 1000

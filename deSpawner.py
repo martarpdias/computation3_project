@@ -12,7 +12,17 @@ class DeSpawner(PowerUp):
 
     def affect_game(self, game):
         # Reduce enemy spawn rate temporarily
-        game["enemy_spawn_rate"] = int(game["enemy_spawn_rate"])/2  # Spawn half as fast
+        game["enemy_spawn_rate"] = int(game["enemy_spawn_rate"]) * 3  # Spawn slower
+
+        # Kill a random number of enemies on the screen
+        enemies_to_kill = random.randint(1, len(game["enemies"]))  # Choose random number
+        enemies_killed = 0
+        for enemy in list(game["enemies"]):  # Convert to list to avoid iteration issues
+            if enemies_killed >= enemies_to_kill:
+                break
+            game["enemies"].remove(enemy)  # Remove the enemy from the group
+            enemy.kill()
+
 
     def remove_effects(self, player, game_context):
         """Reset the spawn rate to normal."""

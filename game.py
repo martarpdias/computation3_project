@@ -53,9 +53,9 @@ def execute_game(player: Player):
 
     # Round management
     current_round = 1
+    final_round = 10
     round_time = 20  # seconds per round
-    start_time = pygame.time.get_ticks()  # Get initial time for the round
-    enemy_spawn_rate = fps * 2  # Initial spawn rate (every 2 seconds)
+    start_time = pygame.time.get_ticks()  # Get initial time for the round    
 
     # Initialize lists for active power-ups
     active_power_ups = []
@@ -75,35 +75,48 @@ def execute_game(player: Player):
         # Update player
         player_group.update()
 
+        
         # Handle power-ups
         # Spawn power-ups
-        if power_up_spawn_timer <= 0:
-            if random.random() < 0.7:  # 20% chance to spawn a power-up
-                x, y = random.randint(50, width - 50), random.randint(50, height - 50)
-                new_power_up = random.choice([Invincibility(x, y), Velocity(x, y), DeSpawner(x, y)])
-                power_ups.add(new_power_up)
-            power_up_spawn_timer = fps * 5  # Reset the power-up timer
-        power_up_spawn_timer -= 1
+        if not active_power_ups:  # Check if there are no active power
+            if power_up_spawn_timer <= 0:
+                if random.random() < 0.2:  # 20% chance to spawn a power-up
+                    x, y = random.randint(50, width - 50), random.randint(50, height - 50)
+                    new_power_up = random.choice([Invincibility(x, y), Velocity(x, y), DeSpawner(x, y)])
+                    power_ups.add(new_power_up)
+                power_up_spawn_timer = fps * 5  # Reset the power-up timer
+            power_up_spawn_timer -= 1
 
-        
         # Check for collisions between the player and power-ups
         collided_power_ups = pygame.sprite.spritecollide(player, power_ups, True)  # `True` removes collided power-ups
         for power_up in collided_power_ups:
             power_up.affect_player(player)  # Apply power-up effect to the player
             power_up.affect_game(locals())  # Apply power-up effect to the game
+            power_up.start_time_use = pygame.time.get_ticks()  # Start usage timer after collision
             active_power_ups.append(power_up)  # Add the power-up to active list
 
-        # Check for expired power-ups
-        for power_up in active_power_ups[:]:  # Iterate over a copy to allow removal
+        # Check for expired power-ups (before collision)
+        for power_up in list(power_ups):  # Iterate over all visible power-ups
             if power_up.is_expired():
+                power_up.kill()  # Remove the power-up sprite from the screen
+
+        # Check for expired power-ups (after collision)
+        for power_up in active_power_ups[:]:  # Iterate over a copy to allow removal
+            if power_up.use_expired():
                 power_up.remove_effects(player, locals())  # Remove power-up effects
                 active_power_ups.remove(power_up)  # Remove from active list
 
+    
+
+        
+        
         # Update power-ups
         power_ups.update()
 
         # Draw power-ups
         power_ups.draw(screen)
+
+
 
         # Calculate the width of the time bar
         bar_width = int((time_left / round_time) * (width - 40))  # Proportional to remaining time
@@ -132,6 +145,44 @@ def execute_game(player: Player):
             # Reset the timer and increase difficulty
             start_time = pygame.time.get_ticks()
             current_round += 1
+            player.health = min(100, int(player.health + player.health/3))  # Reset player health
+            for enemy in enemies:
+                enemy.kill()
+            for bullet in bullets:
+                bullet.kill()
+            for power_up in power_ups:
+                power_up.kill()
+        
+        # Enemy spawning according to the round
+        if enemy_spawn_timer<=0:
+            if current_round == 1:
+                enemy_spawn_rate = fps * 2
+                enemies.add(Enemy())
+                enemy_spawn_timer = enemy_spawn_rate
+            elif current_round == 2:
+                enemy_spawn_rate = fps * 1.5
+                enemies.add(Enemy())
+                enemy_spawn_timer = enemy_spawn_rate
+            elif current_round == 3:
+                enemy_spawn_rate = fps * 2
+                enemy_type = random.choice([Enemy, fast_enemy])
+                new_enemy = enemy_type()
+                enemies.add(new_enemy)
+                enemy_spawn_timer = enemy_spawn_rate
+            elif current_round == 4:
+                enemy_spawn_rate = fps * 1.5
+                enemy_type = random.choice([Enemy, fast_enemy])
+                new_enemy = enemy_type()
+                enemies.add(new_enemy)
+                enemy_spawn_timer = enemy_spawn_rate
+            elif current_round == 5:
+                enemy_spawn_rate = fps * 2
+                enemy_type = random.choice([Enemy, fast_enemy, shooter_rastreio])
+                new_enemy = enemy_type()
+                enemies.add(new_enemy)
+                enemy_spawn_timer = enemy_spawn_rate
+        enemy_spawn_timer -= 1
+
 
         # Display round number
         round_text = font.render(f"Round: {current_round}", True, (255, 255, 255))
@@ -151,22 +202,15 @@ def execute_game(player: Player):
             if event.type == pygame.QUIT:
                 pygame.quit()
 
-        '''for enemy in enemies:
+        for enemy in enemies:
             if isinstance(enemy, shooter_rastreio):
                 enemy.shoot(enemy_bullets, player)
-                pass'''
+                pass
         
         #shooting
         player.shoot(bullets)
 
-        #spawning the enemies
-        if enemy_spawn_timer<=0:
-            #enemy_type = random.choice([Enemy, fast_enemy, shooter_rastreio])
-            enemy_type = random.choice([Enemy])
-            new_enemy = enemy_type()
-            enemies.add(new_enemy)
-            enemy_spawn_timer = enemy_spawn_rate
-
+        
         # Checking for collisions between bullets and enemies
         for bullet in bullets:
             collided_enemies = pygame.sprite.spritecollide(bullet, enemies, False)
@@ -185,11 +229,7 @@ def execute_game(player: Player):
                 bullet.kill()  # Destroy the bullet
             elif player.invincible == True and collided_player:
                 bullet.kill()
-            if player.health <= 0:
-                    show_game_over_screen(screen)
 
-        # Update the enemy spawn timer
-        enemy_spawn_timer -= 1
 
         # Update positions
         player_group.update()
@@ -199,16 +239,15 @@ def execute_game(player: Player):
 
         # Check collisions between player and enemies
         collided_enemies = pygame.sprite.spritecollide(player, enemies, False)
-        damage = 5
         for enemy in collided_enemies:
-            if player.invincible == False:
-                player.take_damage(enemy.damage)
-            
+            enemy.deal_damage(player)
+
+
 
         # Check if the player is dead
         if player.health <= 0:
-            print("game_over")
-
+            show_game_over_screen(screen)
+    
         # Checking if the user goes into the shed area
         if player.rect.right >= width:
             # Change the game state to shed
@@ -267,12 +306,26 @@ def show_game_over_screen(screen):
     screen.fill((0, 0, 0))
     font = pygame.font.SysFont("segoeuiblack", 50)
     text = font.render("Game Over!", True, (255, 255, 255))
-    text_rect = text.get_rect(center=(width // 2, height // 2))
+    text_rect = text.get_rect(center=(resolution[0] // 2, resolution[1] // 2))
     screen.blit(text, text_rect)
+
+    # Restart button
+    restart_button = pygame.Rect(resolution[0] // 2 - 100, resolution[1] // 2 + 100, 200, 50)
+    pygame.draw.rect(screen, (255, 0, 0), restart_button)
+    font = pygame.font.SysFont("segoeuiblack", 30)
+    restart_text = font.render("Restart", True, (255, 255, 255))
+    restart_text_rect = restart_text.get_rect(center=restart_button.center)
+    screen.blit(restart_text, restart_text_rect)
+
     pygame.display.update()
 
+    # Wait for interaction
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
-                return
+                exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if restart_button.collidepoint(event.pos):
+                    return "restart" #is not working yet
+
