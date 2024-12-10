@@ -1,6 +1,6 @@
 import pygame
 
-from class1_ui.config import resolution, white, deep_black, dark_red
+from config import resolution, white, deep_black, dark_red
 
 
 

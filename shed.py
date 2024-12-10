@@ -1,7 +1,7 @@
 import pygame
 from config import *
 from utils import *
-from class1_ui.utils import under_construction
+from utils import under_construction
 
 
 def shed(player):
