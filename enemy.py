@@ -1,6 +1,7 @@
 from utils import *
 from config import *
 from bullet import *
+import time
 import pygame
 import math
 import random
@@ -11,46 +12,41 @@ enemy_bullet = pygame.sprite.Group()
 
 class Enemy(pygame.sprite.Sprite):
     def __init__(self):
-        """
-        Initialize the enemy instance
-        """
         super().__init__()
-        #setting up the surface and rectangle of the enemy
         self.image = pygame.Surface((enemy_size, enemy_size))
         self.image.fill(red)
         self.rect = self.image.get_rect()
 
-        #Positioning
         self.rect.x = random.randint(0, width - enemy_size)
         self.rect.y = random.randint(0, height - enemy_size)
-        #Random speed
+
         self.speed = random.randint(2, 3)
-        #Health
-        self.health=10
+        self.health = 10
         self.max_health = self.health
-        #damage it deals
         self.damage = 5
+        self.damage_cooldown = 2  # Cooldown in seconds
+        self.last_damage_time = 0  # Last time damage was dealt
 
-    def update(self,player):
-        """
-        Update the enemy´s position according to the player´s.
-
-        Args
-        ---
-        player (Player)
-            The player to move towards
-        """
-
-        #Calculation the direction in which the player is (angle)
-        direction=math.atan2(
-            player.rect.y - self.rect.y, player.rect.x - self.rect.x)
-
-        #coordinate update
+    def update(self, player):
+        direction = math.atan2(player.rect.y - self.rect.y, player.rect.x - self.rect.x)
         self.rect.x += int(self.speed * math.cos(direction))
         self.rect.y += int(self.speed * math.sin(direction))
 
-        self.rect.x =int(self.rect.x)
-        self.rect.y =int(self.rect.y)
+    def can_deal_damage(self):
+        """
+        Check if enough time has passed since the last damage was dealt.
+        """
+        current_time = time.time()
+        return current_time - self.last_damage_time >= self.damage_cooldown
+
+    def deal_damage(self, player):
+        """
+        Deal damage to the player if cooldown has passed.
+        """
+        if self.can_deal_damage():
+            player.take_damage(self.damage)
+            self.last_damage_time = time.time()
+
 
 class fast_enemy(Enemy):
     def __init__(self):
@@ -64,9 +60,10 @@ class fast_enemy(Enemy):
         #Random speed
         self.speed = random.randint(4, 5)
         #Health
-        self.health = 10
+        self.health = 5
         #damage it deals
-        self.damage = 5
+        self.damage = 3
+
 
 class shooter_rastreio(Enemy):
     def __init__(self):

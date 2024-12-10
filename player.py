@@ -3,8 +3,8 @@ import pygame
 import math
 from bullet import Bullet
 import time
-from game import *
 from enemy import Enemy
+
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         """
@@ -65,13 +65,9 @@ class Player(pygame.sprite.Sprite):
         self.bullet_cooldown -=1
 
     def take_damage(self, damage):
-        '''
-        give the player invincibility for a short period of time to avoid instantly diying
-        '''
-        current_time = time.time()
-        if current_time - self.last_hit_time >= self.invincibility_cooldown:
+        if not self.invincible:
             self.health -= damage
-            self.last_hit_time = current_time
+            self.health = max(0, self.health)  # Prevent health from going below zero
 
 
 
