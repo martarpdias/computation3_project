@@ -11,6 +11,7 @@ from invicibility import Invincibility
 from deSpawner import DeSpawner
 from velocity import Velocity
 
+
 def game_loop():
     player = Player()
     current_state = "main"
@@ -52,9 +53,12 @@ def execute_game(player: Player):
 
     # Round management
     current_round = 1
-    round_time = 90  # seconds per round
+    round_time = 20  # seconds per round
     start_time = pygame.time.get_ticks()  # Get initial time for the round
     enemy_spawn_rate = fps * 2  # Initial spawn rate (every 2 seconds)
+
+    # Initialize lists for active power-ups
+    active_power_ups = []
 
     running = True
     while running:
@@ -67,6 +71,39 @@ def execute_game(player: Player):
         # Calculate remaining time
         elapsed_time = (pygame.time.get_ticks() - start_time) / 1000  # Time in seconds
         time_left = max(0, round_time - elapsed_time)
+
+        # Update player
+        player_group.update()
+
+        # Handle power-ups
+        # Spawn power-ups
+        if power_up_spawn_timer <= 0:
+            if random.random() < 0.7:  # 20% chance to spawn a power-up
+                x, y = random.randint(50, width - 50), random.randint(50, height - 50)
+                new_power_up = random.choice([Invincibility(x, y), Velocity(x, y), DeSpawner(x, y)])
+                power_ups.add(new_power_up)
+            power_up_spawn_timer = fps * 5  # Reset the power-up timer
+        power_up_spawn_timer -= 1
+
+        
+        # Check for collisions between the player and power-ups
+        collided_power_ups = pygame.sprite.spritecollide(player, power_ups, True)  # `True` removes collided power-ups
+        for power_up in collided_power_ups:
+            power_up.affect_player(player)  # Apply power-up effect to the player
+            power_up.affect_game(locals())  # Apply power-up effect to the game
+            active_power_ups.append(power_up)  # Add the power-up to active list
+
+        # Check for expired power-ups
+        for power_up in active_power_ups[:]:  # Iterate over a copy to allow removal
+            if power_up.is_expired():
+                power_up.remove_effects(player, locals())  # Remove power-up effects
+                active_power_ups.remove(power_up)  # Remove from active list
+
+        # Update power-ups
+        power_ups.update()
+
+        # Draw power-ups
+        power_ups.draw(screen)
 
         # Calculate the width of the time bar
         bar_width = int((time_left / round_time) * (width - 40))  # Proportional to remaining time
@@ -114,18 +151,18 @@ def execute_game(player: Player):
             if event.type == pygame.QUIT:
                 pygame.quit()
 
-        for enemy in enemies:
+        '''for enemy in enemies:
             if isinstance(enemy, shooter_rastreio):
                 enemy.shoot(enemy_bullets, player)
-                pass
-
+                pass'''
+        
         #shooting
         player.shoot(bullets)
 
-
         #spawning the enemies
         if enemy_spawn_timer<=0:
-            enemy_type = random.choice([Enemy, fast_enemy, shooter_rastreio])
+            #enemy_type = random.choice([Enemy, fast_enemy, shooter_rastreio])
+            enemy_type = random.choice([Enemy])
             new_enemy = enemy_type()
             enemies.add(new_enemy)
             enemy_spawn_timer = enemy_spawn_rate
@@ -143,12 +180,13 @@ def execute_game(player: Player):
         # Checking for collisions between bullets and players
         for bullet in enemy_bullets:
             collided_player = pygame.sprite.spritecollideany(bullet, player_group)
-            if collided_player:
-                player.health -= 5  # Decrease health by 5 for each hit
+            if player.invincible == False and collided_player:
+                player.health -= 5  # Decrease health by 1 for each hit
                 bullet.kill()  # Destroy the bullet
-                if player.health <= 0:
-                    player.kill()  # Destroy the player
-                    score += 100
+            elif player.invincible == True and collided_player:
+                bullet.kill()
+            if player.health <= 0:
+                    show_game_over_screen(screen)
 
         # Update the enemy spawn timer
         enemy_spawn_timer -= 1
@@ -163,7 +201,8 @@ def execute_game(player: Player):
         collided_enemies = pygame.sprite.spritecollide(player, enemies, False)
         damage = 5
         for enemy in collided_enemies:
-            player.take_damage(enemy.damage)
+            if player.invincible == False:
+                player.take_damage(enemy.damage)
             
 
         # Check if the player is dead
@@ -194,48 +233,6 @@ def execute_game(player: Player):
         score_text = font.render(f"Score: {score}", True, (255, 255, 255))  # White text
         screen.blit(score_text, (295, 45))  # Display the score at the top-left corner
 
-        # Update the display
-        pygame.display.flip()
-
-        # Update the display
-        pygame.display.flip()
-
-        #power ups
-        power_ups = pygame.sprite.Group()
-        power_up_spawn_timer = 0  # Timer for spawning power-ups
-
-        
-
-        # Spawning power-ups
-        if power_up_spawn_timer <= 0:
-            if random.random() < 0.2:  # 20% chance each frame
-                x, y = random.randint(50, width - 50), random.randint(50, height - 50)
-                if random.random() < 0.33:
-                    new_power_up = Invincibility(x, y, duration=5)
-                elif random.random() < 0.66:
-                    new_power_up = Velocity(x, y, duration=5)
-                else:
-                    new_power_up = DeSpawner(x, y, duration=5)
-                power_ups.add(new_power_up)
-            power_up_spawn_timer = fps * 5
-        power_up_spawn_timer -= 1
-
-        # Check for collisions between the player and power-ups
-        collided_power_ups = pygame.sprite.spritecollide(player, power_ups, True)
-        for power_up in collided_power_ups:
-            power_up.start_time = pygame.time.get_ticks()
-            power_up.affect_player(player)
-            power_up.affect_game({
-                "enemies": enemies,
-                "enemy_spawn_rate": enemy_spawn_rate
-            })
-            player.active_power_up = power_up
-
-        # Handle active power-up
-        if player.active_power_up and player.active_power_up.is_expired():
-            player.active_power_up.remove_effects(player, {"enemy_spawn_rate": fps * 2})
-            player.active_power_up = None
-
         # Update groups
         player_group.update()
         bullets.update()
@@ -255,6 +252,7 @@ def execute_game(player: Player):
 
         # Update the display
         pygame.display.flip()
+
 
 def show_transition_screen(screen):
     screen.fill((0, 0, 0))

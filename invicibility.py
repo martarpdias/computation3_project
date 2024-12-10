@@ -1,11 +1,11 @@
 import pygame
 from powerUps import PowerUp
+from config import *
 
 class Invincibility(PowerUp):
-    def __init__(self, x, y, duration=5):
-        super().__init__(x, y, duration)
-        self.image.fill((255, 105, 180))  # Pink star
-        pygame.draw.polygon(self.image, (255, 20, 147), [(15, 0), (20, 30), (0, 10), (30, 10), (10, 30)])  # Star shape
+    def __init__(self, x, y):
+        super().__init__(x, y, (255, 105, 180))  # Pink
+ 
 
     def affect_player(self, player):
         """Make the player invincible."""
@@ -19,5 +19,6 @@ class Invincibility(PowerUp):
     def remove_effects(self, player, game_context):
         """Remove the invincibility effect."""
         player.invincible = False
+        player.image.fill(blue)
 
 

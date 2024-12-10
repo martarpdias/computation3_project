@@ -24,9 +24,9 @@ class Enemy(pygame.sprite.Sprite):
         self.rect.x = random.randint(0, width - enemy_size)
         self.rect.y = random.randint(0, height - enemy_size)
         #Random speed
-        self.speed = random.randint(2, 3)
+        self.speed = random.randint(1, 2)
         #Health
-        self.health=10
+        self.health=5
         self.max_health = self.health
         #damage it deals
         self.damage = 5
@@ -52,7 +52,7 @@ class Enemy(pygame.sprite.Sprite):
         self.rect.x =int(self.rect.x)
         self.rect.y =int(self.rect.y)
 
-class fast_enemy(Enemy):
+'''class fast_enemy(Enemy):
     def __init__(self):
         """
         Initialize the enemy instance
@@ -93,7 +93,7 @@ class shooter_rastreio(Enemy):
             
     
     def update(self, player):
-       pass
+       pass'''
     
         
 

@@ -3,8 +3,8 @@ import pygame
 import math
 from bullet import Bullet
 import time
-from game import *
 from enemy import Enemy
+
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         """

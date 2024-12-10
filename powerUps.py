@@ -3,12 +3,33 @@ import random
 from abc import ABC, abstractmethod
 
 class PowerUp(pygame.sprite.Sprite, ABC):
-    def __init__(self, x, y, duration):
+    def __init__(self, x, y, color):
         super().__init__()
-        self.image = pygame.Surface((30, 30))  # Default size
+        self.color = color
+        self.radius = 15  # Radius of the glowing circle
+        self.image = pygame.Surface((self.radius * 4, self.radius * 4), pygame.SRCALPHA)  # Semi-transparent surface
         self.rect = self.image.get_rect(center=(x, y))
-        self.duration = duration  # Duration in seconds
+        self.create_glow()
+
+        self.duration = 5  # Duration in seconds
         self.start_time = pygame.time.get_ticks()  # Set start time when created
+
+    def create_glow(self):
+        """Create the glowing circle effect."""
+        center = self.image.get_width() // 2
+        for i in range(1, 4):  # Add multiple layers of glow
+            pygame.draw.circle(
+                self.image,
+                (self.color[0], self.color[1], self.color[2], 255 // (i * 2)),  # Fading alpha for glow
+                (center, center),
+                self.radius + i * 5,  # Outer radius for the glow
+            )
+        pygame.draw.circle(
+            self.image,
+            self.color,
+            (center, center),
+            self.radius,  # Inner solid circle
+        )
 
     @abstractmethod
     def affect_player(self, player):
@@ -25,11 +46,16 @@ class PowerUp(pygame.sprite.Sprite, ABC):
         pass
 
     def update(self):
-        """Update the power-up (for optional animations)."""
-        pass
+        """Add a pulsing glow animation."""
+        pulse = (pygame.time.get_ticks() // 100) % 20  # Create a pulsing effect
+        self.radius = 15 + pulse // 5  # Adjust the radius slightly
+        self.image.fill((0, 0, 0, 0))  # Clear the previous surface
+        self.create_glow()  # Redraw the glow with the new radius
+
 
     def is_expired(self):
         """Check if the power-up duration has expired."""
         return pygame.time.get_ticks() - self.start_time > self.duration * 1000
+
 
 
