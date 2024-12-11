@@ -23,7 +23,7 @@ class Player(pygame.sprite.Sprite):
         self.bullet_cooldown=0
         self.invincible = False  # To handle invincibility
         self.active_power_up = None  # Currently active power-up
-        self.invincibility_cooldown = 1 #invincibility of 1 second
+        #self.invincibility_cooldown = 1 #invincibility of 1 second
         self.last_hit_time = time.time() # Time of the last hit
 
     def update(self):
