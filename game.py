@@ -30,7 +30,7 @@ def execute_game(player: Player):
 
     # Setting up the screen and background
     screen = pygame.display.set_mode((resolution))
-    background = pygame.image.load("Lightningmcqueen.webp")
+    background = pygame.image.load("game_background.jpg")
     background = pygame.transform.scale(background, (width, height))
 
     # Player setup

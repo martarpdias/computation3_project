@@ -12,6 +12,7 @@ blue = (0, 0, 255)  # Blue for information
 yellow = (255, 255, 0)  # Yellow for warnings
 
 
+
 # SCREEN RESOLUTION
 resolution = (720, 720)
 resolution = (1200, 600)
