@@ -7,10 +7,10 @@ def interface():
     # creating the screen at the set resolution
     screen = pygame.display.set_mode(resolution)
 
-
-    pygame.mouse.set_cursor(*pygame.cursors.tri_left)  # Left-pointing triangle
-
-
+    #pygame.mouse.set_cursor(*pygame.cursors.arrow)  # Default arrow
+    pygame.mouse.set_cursor(*pygame.cursors.diamond)  # Diamond cursor
+    #pygame.mouse.set_cursor(*pygame.cursors.ball)  # Small circle cursor
+    #pygame.mouse.set_cursor(*pygame.cursors.tri_left)  # Left-pointing
 
     # Initialize pygame mixer
     pygame.mixer.init()
@@ -25,11 +25,11 @@ def interface():
 
 
 
+
     #Fonts
     stencil_font = pygame.font.SysFont("stencil", 40)
 
-
-    #Define the two lines for the title text
+    
     game_name_line = "Rebellion of the Machines"
 
 
@@ -114,6 +114,7 @@ def interface():
         rules_rect = rules_text.get_rect(center=(500 + 200 // 2, 240 + 60 // 2))
         screen.blit(rules_text, rules_rect)
 
+
         pygame.draw.rect(screen, grey, [500, 320, 200, 60],border_radius=15)
         options_rect = options_text.get_rect(center=(500 + 200 // 2, 320 + 60 // 2))
         screen.blit(options_text, options_rect)
@@ -123,6 +124,7 @@ def interface():
         screen.blit(credits_text, credits_rect)
 
         pygame.draw.rect(screen, grey, [500, 480, 200, 60],border_radius=15)
+
         quit_rect = quit_text.get_rect(center=(500 + 200 // 2, 480 + 60 // 2))
         screen.blit(quit_text, quit_rect)
 
@@ -191,8 +193,6 @@ def credits_():
     ocraextended_font = pygame.font.SysFont("ocraextended", 25)
 
     # text
-    ocraextended_font.set_bold(True)
-    joao_text =  ocraextended_font.render("João Santos", True, deep_black)
     joao_number =  ocraextended_font.render("20231697", True, white)
     marta_text= ocraextended_font.render("Marta Dias", True, deep_black)
     marta_number = ocraextended_font.render("20231642", True, white)
@@ -246,7 +246,9 @@ def credits_():
 
 
         # draw a back button [x, y, width, height]
+
         pygame.draw.rect(screen, dark_red, [20, 520, 140, 60],border_radius=15)
+
         back_text = stencil_font.render("BACK", True, white)
         back_rect = back_text.get_rect(center=(20 + 140 // 2, 520 + 60 // 2))
         screen.blit(back_text, back_rect)
@@ -537,16 +539,8 @@ def options_():
 
 
 
-
-
-
-
-
-
         # Update the display
         pygame.display.update()
-
-
 
 
 

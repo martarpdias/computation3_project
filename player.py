@@ -2,6 +2,8 @@ from config import *
 import pygame
 import math
 from bullet import Bullet
+import time
+from enemy import Enemy
 
 class Player(pygame.sprite.Sprite):
     def __init__(self):
@@ -34,6 +36,10 @@ class Player(pygame.sprite.Sprite):
         self.speed=5
         self.health=100
         self.bullet_cooldown=0
+        self.invincible = False  # To handle invincibility
+        self.active_power_up = None  # Currently active power-up
+        self.invincibility_cooldown = 1 #invincibility of 1 second
+        self.last_hit_time = time.time() # Time of the last hit
 
     def update(self):
         """
@@ -72,6 +78,12 @@ class Player(pygame.sprite.Sprite):
                 bullets.add(bullet)
             self.bullet_cooldown=fps #frames until the next shot
         self.bullet_cooldown -=1
+
+    def take_damage(self, damage):
+        if not self.invincible:
+            self.health -= damage
+            self.health = max(0, self.health)  # Prevent health from going below zero
+
 
 
 
