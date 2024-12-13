@@ -13,6 +13,7 @@ yellow = (255, 255, 0)  # Yellow for warnings
 pink = (255, 192, 203)  # Pinkdi pink pink
 
 
+
 # SCREEN RESOLUTION
 resolution = (1200, 600)
 width, height = resolution[0], resolution[1] #for calculation
