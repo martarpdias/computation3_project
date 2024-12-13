@@ -193,6 +193,7 @@ def credits_():
     ocraextended_font = pygame.font.SysFont("ocraextended", 25)
 
     # text
+    joao_text = ocraextended_font.render("João Santos", True, deep_black)
     joao_number =  ocraextended_font.render("20231697", True, white)
     marta_text= ocraextended_font.render("Marta Dias", True, deep_black)
     marta_number = ocraextended_font.render("20231642", True, white)
