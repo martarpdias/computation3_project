@@ -536,17 +536,8 @@ def options_():
 
 
 
-
-
-
-
-
-
-
         # Update the display
         pygame.display.update()
-
-
 
 
 

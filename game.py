@@ -11,6 +11,10 @@ from invicibility import Invincibility
 from deSpawner import DeSpawner
 from velocity import Velocity
 
+
+
+
+
 def game_loop():
     player = Player()
     current_state = "main"
@@ -21,6 +25,10 @@ def game_loop():
         elif current_state == "shed":
             current_state = shed(player)
 
+
+
+
+
 def execute_game(player: Player):
     """
     Main function to execute the game loop, with round transitions.
@@ -30,7 +38,7 @@ def execute_game(player: Player):
 
     # Setting up the screen and background
     screen = pygame.display.set_mode((resolution))
-    background = pygame.image.load("grass.jpg")
+    background = pygame.image.load("game_background.jpg")
     background = pygame.transform.scale(background, (width, height))
 
     # Player setup
@@ -52,6 +60,10 @@ def execute_game(player: Player):
     start_time = pygame.time.get_ticks()  # Get initial time for the round
     enemy_spawn_rate = fps * 2  # Initial spawn rate (every 2 seconds)
 
+    #Bullet type management
+    selected_bullet_type=1   #Default bullet type
+    shooting_timer=0
+
 
     running = True
     while running:
@@ -60,6 +72,45 @@ def execute_game(player: Player):
 
         # Draw the background
         screen.blit(background, (0, 0))
+
+
+
+
+        # Event handling
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                return
+
+            # Detect key presses for bullet selection
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_1:
+                    selected_bullet_type = 1  # Normal bullet
+                elif event.key == pygame.K_2:
+                    selected_bullet_type = 2  # Fast bullet
+                elif event.key == pygame.K_3:
+                    selected_bullet_type = 3  # Large bullet
+
+        #automatic shooting
+        if shooting_timer <= 0:  # Shoot every few frames
+            directions = [math.radians(0), math.radians(90),math.radians(180), math.radians(270)]
+
+            for direction in directions:
+                bullet = shoot_bullet(player.rect.centerx, player.rect.centery, direction, selected_bullet_type)
+                bullets.add(bullet)
+
+            shooting_timer = fps // 2  # Adjust shooting rate
+
+        shooting_timer -= 0.5  # Decrement the shooting timer
+        # Update and draw bullets
+        bullets.update()
+        for bullet in bullets:
+            bullet.draw(screen)
+
+
+
+
+
 
         # Calculate remaining time
         elapsed_time = (pygame.time.get_ticks() - start_time) / 1000  # Time in seconds
@@ -120,7 +171,7 @@ def execute_game(player: Player):
                 pass
 
         #shooting
-        player.shoot(bullets)
+        #player.shoot(bullets)
 
 
         #spawning the enemies
@@ -275,3 +326,5 @@ def show_game_over_screen(screen):
             if event.type == pygame.QUIT:
                 pygame.quit()
                 return
+
+
