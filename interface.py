@@ -487,6 +487,7 @@ def options_():
 
 
         # Background image
+        resolution=(1200,600)
         background_image = pygame.image.load("options_background.jpg")
         background_image = pygame.transform.scale(background_image, resolution)  # Scale it to fit the screen
         screen.blit(background_image, (0, 0))  # Draw the background image
@@ -521,7 +522,7 @@ def options_():
         rect_y = resolution[1] // 3 + 120
 
         # Draw the mute button rectangle
-        mute_button_color = deep_black if not is_muted else (0, 255, 0)  # Green if muted
+        mute_button_color = deep_black if not is_muted else grey # Dark red when not muted, grey when muted
         pygame.draw.rect(screen, mute_button_color, (rect_x, rect_y, rect_width, rect_height), border_radius=15)
 
         # Draw the text on top of the button

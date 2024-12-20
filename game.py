@@ -12,10 +12,8 @@ from deSpawner import DeSpawner
 from velocity import Velocity
 
 
-
-
-
 def game_loop():
+
     player = Player()
     current_state = "main"
 
@@ -27,8 +25,6 @@ def game_loop():
 
 
 
-
-
 def execute_game(player: Player):
     """
     Main function to execute the game loop, with round transitions.
@@ -36,6 +32,7 @@ def execute_game(player: Player):
     # Clock for controlling the frame rate
     clock = pygame.time.Clock()
 
+    resolution=(1200,600)
     # Setting up the screen and background
     screen = pygame.display.set_mode((resolution))
     background = pygame.image.load("game_background.jpg")
@@ -46,9 +43,9 @@ def execute_game(player: Player):
     player_group.add(player)
     score = 0
 
-    #Initialize bullets
-    bullets=pygame.sprite.Group()
-    enemy_bullets=pygame.sprite.Group()
+    # Initialize bullets
+    bullets = pygame.sprite.Group()
+    enemy_bullets = pygame.sprite.Group()
 
     # Initialize the enemy group
     enemies = pygame.sprite.Group()
@@ -60,10 +57,9 @@ def execute_game(player: Player):
     start_time = pygame.time.get_ticks()  # Get initial time for the round
     enemy_spawn_rate = fps * 2  # Initial spawn rate (every 2 seconds)
 
-    #Bullet type management
-    selected_bullet_type=1   #Default bullet type
-    shooting_timer=0
-
+    # Bullet type management
+    selected_bullet_type = 1  # Default bullet type
+    shooting_timer = 0
 
     running = True
     while running:
@@ -72,9 +68,6 @@ def execute_game(player: Player):
 
         # Draw the background
         screen.blit(background, (0, 0))
-
-
-
 
         # Event handling
         for event in pygame.event.get():
@@ -91,9 +84,9 @@ def execute_game(player: Player):
                 elif event.key == pygame.K_3:
                     selected_bullet_type = 3  # Large bullet
 
-        #automatic shooting
+        # automatic shooting
         if shooting_timer <= 0:  # Shoot every few frames
-            directions = [math.radians(0), math.radians(90),math.radians(180), math.radians(270)]
+            directions = [math.radians(0), math.radians(90), math.radians(180), math.radians(270)]
 
             for direction in directions:
                 bullet = shoot_bullet(player.rect.centerx, player.rect.centery, direction, selected_bullet_type)
@@ -107,17 +100,12 @@ def execute_game(player: Player):
         for bullet in bullets:
             bullet.draw(screen)
 
-
-
-
-
-
         # Calculate remaining time
         elapsed_time = (pygame.time.get_ticks() - start_time) / 1000  # Time in seconds
         time_left = max(0, round_time - elapsed_time)
 
         # Calculate the width of the time bar
-        bar_width = int((time_left / round_time) * width-40)  # Proportional to remaining time
+        bar_width = int((time_left / round_time) * width - 40)  # Proportional to remaining time
 
         # Set the color of the time bar (optional: green -> yellow -> red transition)
         if time_left > round_time * 0.5:
@@ -128,8 +116,10 @@ def execute_game(player: Player):
             bar_color = (255, 0, 0)  # Red
 
         # Add rounded corners to the time bar
-        pygame.draw.rect(screen, (255, 255, 255), (20, height-40, width-40, 25), border_radius=10)  # Draw a background bar
-        pygame.draw.rect(screen, bar_color, (30, height-35, bar_width, 15), border_radius=10)  # Time bar with rounded corners
+        pygame.draw.rect(screen, (255, 255, 255), (20, height - 40, width - 40, 25),
+                         border_radius=10)  # Draw a background bar
+        pygame.draw.rect(screen, bar_color, (30, height - 35, bar_width, 15),
+                         border_radius=10)  # Time bar with rounded corners
 
         # Display the numerical time remaining
         font = pygame.font.SysFont("segoeuiblack", 20)
@@ -149,9 +139,12 @@ def execute_game(player: Player):
         screen.blit(round_text, (160, 45))
 
         # Draw player health bar
-        player_health_bar_width = int((player.health/100) * (width/3))  # Scale health to a thrid of the screen width
-        pygame.draw.rect(screen, (255, 0, 0), (15, 20, (width/3), 20), border_radius=10)  # Background for the health bar
-        pygame.draw.rect(screen, (0, 255, 0), (15, 20, player_health_bar_width, 20), border_radius = 10)  # Player health bar
+        player_health_bar_width = int(
+            (player.health / 100) * (width / 3))  # Scale health to a thrid of the screen width
+        pygame.draw.rect(screen, (255, 0, 0), (15, 20, (width / 3), 20),
+                         border_radius=10)  # Background for the health bar
+        pygame.draw.rect(screen, (0, 255, 0), (15, 20, player_health_bar_width, 20),
+                         border_radius=10)  # Player health bar
         if player.health <= 0:
             show_game_over_screen(screen)
 
@@ -170,12 +163,11 @@ def execute_game(player: Player):
                 enemy.shoot(enemy_bullets, player)
                 pass
 
-        #shooting
-        #player.shoot(bullets)
+        # shooting
+        # player.shoot(bullets)
 
-
-        #spawning the enemies
-        if enemy_spawn_timer<=0:
+        # spawning the enemies
+        if enemy_spawn_timer <= 0:
             enemy_type = random.choice([Enemy, fast_enemy, shooter_rastreio])
             new_enemy = enemy_type()
             enemies.add(new_enemy)
@@ -210,12 +202,11 @@ def execute_game(player: Player):
         enemies.update(player)
         enemy_bullets.update()
 
-        #check for colission btween player and enemies
+        # check for colission btween player and enemies
         collided_enemies = pygame.sprite.spritecollide(player, enemies, False)
         damage = 5
         for enemy in collided_enemies:
             player.take_damage(enemy.damage)
-            
 
         # Check if the player is dead
         if player.health <= 0:
@@ -237,9 +228,11 @@ def execute_game(player: Player):
         # Draw health bars for enemies
         enemy_health_bar_max_width = 50  # Maximum width of the health bar
         for enemy in enemies:
-            enemy_health_bar_width = int((enemy.health / enemy.max_health) * enemy_health_bar_max_width)  # Scale enemy health to the max width
+            enemy_health_bar_width = int(
+                (enemy.health / enemy.max_health) * enemy_health_bar_max_width)  # Scale enemy health to the max width
             pygame.draw.rect(screen, (255, 0, 0), (enemy.rect.x, enemy.rect.y - 10, 50, 5))  # Background bar
-            pygame.draw.rect(screen, (0, 255, 0), (enemy.rect.x, enemy.rect.y - 10, enemy_health_bar_width, 5))  # Enemy health bar
+            pygame.draw.rect(screen, (0, 255, 0),
+                             (enemy.rect.x, enemy.rect.y - 10, enemy_health_bar_width, 5))  # Enemy health bar
 
         # Display the score
         score_text = font.render(f"Score: {score}", True, (255, 255, 255))  # White text
@@ -247,6 +240,8 @@ def execute_game(player: Player):
 
         # Update the display
         pygame.display.flip()
+
+
 '''
         #power ups
         power_ups = pygame.sprite.Group()
@@ -292,8 +287,6 @@ def execute_game(player: Player):
 '''
 
 
-    
-    
 def show_transition_screen(screen):
     """
     Displays a black screen for 2 seconds as a transition between rounds.
@@ -326,5 +319,3 @@ def show_game_over_screen(screen):
             if event.type == pygame.QUIT:
                 pygame.quit()
                 return
-
-
