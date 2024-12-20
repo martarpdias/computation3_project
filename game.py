@@ -3,7 +3,7 @@ import math
 import pygame
 import random
 
-from shed import shed
+from map import map
 from enemy import *
 from player import Player
 from bullet import Bullet
@@ -19,8 +19,8 @@ def game_loop():
     while True:
         if current_state == "main":
             current_state = execute_game(player)
-        elif current_state == "shed":
-            current_state = shed(player)
+        elif current_state == "map":
+            current_state = map(player)
 
 def execute_game(player: Player):
     """
@@ -135,6 +135,7 @@ def execute_game(player: Player):
         screen.blit(time_text, (25, height - 70))
 
         if elapsed_time >= round_time:
+<<<<<<< Updated upstream
             action = show_transition_screen(screen, current_round)
             if player.rect.right >= width:
                 return "shed"  # Change the game state to shed
@@ -147,16 +148,32 @@ def execute_game(player: Player):
                 start_time = pygame.time.get_ticks()
                 current_round += 1
                 player.health = min(100, int(player.health + player.health / 3))  # Reset player health
+=======
+            # Show transition screen
+            result = show_transition_screen(screen, current_round, lambda: map(player))
+            if result == "next_round":
+                # Proceed to the next round
+                start_time = pygame.time.get_ticks()
+                current_round += 1
+                player.health = min(100, int(player.health + player.health / 3))
+>>>>>>> Stashed changes
                 for enemy in enemies:
                     enemy.kill()
                 for bullet in bullets:
                     bullet.kill()
                 for power_up in power_ups:
                     power_up.kill()
+<<<<<<< Updated upstream
             elif action == "shed":
                 return "shed" # Transition to the shed state
 
 
+=======
+            elif result == "map":
+                return "map"
+
+        
+>>>>>>> Stashed changes
         # Enemy spawning according to the round
         if enemy_spawn_timer<=0:
             if current_round == 1:
@@ -252,9 +269,9 @@ def execute_game(player: Player):
             show_game_over_screen(screen)
     
         # Checking if the user goes into the shed area
-        if player.rect.right >= width:
+        '''if player.rect.right >= width:
             # Change the game state to shed
-            return "shed"
+            return "shed"'''
 
         # Draw game objects
         player_group.draw(screen)
@@ -296,6 +313,7 @@ def execute_game(player: Player):
         pygame.display.flip()
 
 
+<<<<<<< Updated upstream
 def show_transition_screen(screen, current_round):
     """
     Displays a transition screen with the round number and two buttons: 'Next Round' and 'Map'.
@@ -346,15 +364,69 @@ def show_transition_screen(screen, current_round):
         pygame.display.update()
 
         # Handle events
+=======
+def show_transition_screen(screen, current_round, map_function, player):
+    """
+    Displays a transition screen after a round is completed.
+    
+    Args:
+        screen (pygame.Surface): The game screen to render on.
+        current_round (int): The current round number.
+        map_function (function): The map function to call when the "Map" button is clicked.
+    """
+    player_group = pygame.sprite.Group()
+    player_group.add(player)
+
+    screen.fill((0, 0, 0))
+    font = pygame.font.SysFont("segoeuiblack", 50)
+    
+    # Round completion message
+    text = font.render(f"Round {current_round} completed!", True, (255, 255, 255))
+    text_rect = text.get_rect(center=(width // 2, height // 3))
+    screen.blit(text, text_rect)
+    
+    # Button font
+    button_font = pygame.font.SysFont("segoeuiblack", 30)
+    
+    # Next Round button
+    next_button = pygame.Rect(width // 2 - 150, height // 2, 300, 50)
+    pygame.draw.rect(screen, (0, 255, 0), next_button, border_radius=10)
+    next_text = button_font.render("Next Round", True, (0, 0, 0))
+    next_text_rect = next_text.get_rect(center=next_button.center)
+    screen.blit(next_text, next_text_rect)
+    
+    # Map button
+    map_button = pygame.Rect(width // 2 - 150, height // 2 + 100, 300, 50)
+    pygame.draw.rect(screen, (0, 0, 255), map_button, border_radius=10)
+    map_text = button_font.render("Map", True, (255, 255, 255))
+    map_text_rect = map_text.get_rect(center=map_button.center)
+    screen.blit(map_text, map_text_rect)
+    
+    pygame.display.update()
+    
+    # Wait for user interaction
+    while True:
+>>>>>>> Stashed changes
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
+<<<<<<< Updated upstream
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if next_button_rect.collidepoint(event.pos):
                     return "next_round"  # User chose to start the next round
                 elif map_button_rect.collidepoint(event.pos):
                     return "shed"  # User chose to go to the shed
+=======
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if next_button.collidepoint(event.pos):
+                    return "next_round"
+                if map_button.collidepoint(event.pos):
+                    map(player)
+                    return "map"
+
+
+>>>>>>> Stashed changes
 
 
 
