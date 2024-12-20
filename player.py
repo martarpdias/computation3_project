@@ -10,11 +10,26 @@ class Player(pygame.sprite.Sprite):
         """
         Initialize the player instance
         """
+        #super().__init__()
+        #self.image = pygame.Surface(player_size)
+        #self.image.fill(blue)
+        #self.rect=self.image.get_rect()
+        #self.rect.center=(width//2,height//2)
+
         super().__init__()
-        self.image = pygame.Surface(player_size)
-        self.image.fill(blue)
-        self.rect=self.image.get_rect()
-        self.rect.center=(width//2,height//2)
+        # Upload the image of the player
+        self.image = pygame.image.load("player_picture.png").convert_alpha()
+
+        # Resize the image
+        player_width, player_height = 75, 75  # new size
+        self.image = pygame.transform.scale(self.image, (player_width, player_height))
+
+        # Define the rectangle of the image
+        self.rect = self.image.get_rect()
+
+        # Puts the player in the center of the screen
+        self.rect.center = (width // 2, height // 2)
+
 
 
         #Gameplay variables

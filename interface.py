@@ -10,28 +10,26 @@ def interface():
     #pygame.mouse.set_cursor(*pygame.cursors.arrow)  # Default arrow
     pygame.mouse.set_cursor(*pygame.cursors.diamond)  # Diamond cursor
     #pygame.mouse.set_cursor(*pygame.cursors.ball)  # Small circle cursor
-    #pygame.mouse.set_cursor(*pygame.cursors.tri_left)  # Left-pointing triangle
-
-
+    #pygame.mouse.set_cursor(*pygame.cursors.tri_left)  # Left-pointing
 
     # Initialize pygame mixer
     pygame.mixer.init()
 
-    ''' def play_music():
+    def play_music():
         # Check if music is already playing
         if not pygame.mixer.music.get_busy():  # If no music is playing
             pygame.mixer.music.load("background_music.mp3")  # Load music
             pygame.mixer.music.play(-1, 0.0)  # Play music indefinitely
 
-    play_music()'''
+    play_music()
 
 
 
-    # fonts
+
+    #Fonts
     stencil_font = pygame.font.SysFont("stencil", 40)
 
-
-    # Define the two lines for the title text
+    
     game_name_line = "Rebellion of the Machines"
 
 
@@ -44,6 +42,7 @@ def interface():
     quit_text =  stencil_font.render("Quit", True, white)
     title_text= stencil_font.render(game_name_line, True, dark_red)
     play_text = stencil_font.render("PLAY", True, white)
+
 
     # Main game loop
     while True:
@@ -75,7 +74,7 @@ def interface():
 
 
         # Background image
-        background_image = pygame.image.load("background1.jpg")
+        background_image = pygame.image.load("background_interface.jpg")
         background_image = pygame.transform.scale(background_image, resolution)  # Scale it to fit the screen
         screen.blit(background_image, (0, 0)) # Draw the background image
 
@@ -111,26 +110,73 @@ def interface():
 
         # Drawing other buttons
 
-        pygame.draw.rect(screen, grey, [500, 240, 200, 60])
+        pygame.draw.rect(screen, grey, [500, 240, 200, 60],border_radius=15)
         rules_rect = rules_text.get_rect(center=(500 + 200 // 2, 240 + 60 // 2))
         screen.blit(rules_text, rules_rect)
 
-        pygame.draw.rect(screen, grey, [500, 320, 200, 60])
+
+        pygame.draw.rect(screen, grey, [500, 320, 200, 60],border_radius=15)
         options_rect = options_text.get_rect(center=(500 + 200 // 2, 320 + 60 // 2))
         screen.blit(options_text, options_rect)
 
-        pygame.draw.rect(screen, grey, [500, 400, 200, 60])
+        pygame.draw.rect(screen, grey, [500, 400, 200, 60],border_radius=15)
         credits_rect = credits_text.get_rect(center=(500 + 200 // 2, 400 + 60 // 2))
         screen.blit(credits_text, credits_rect)
 
-        pygame.draw.rect(screen, grey, [500, 480, 200, 60])
+        pygame.draw.rect(screen, grey, [500, 480, 200, 60],border_radius=15)
+
         quit_rect = quit_text.get_rect(center=(500 + 200 // 2, 480 + 60 // 2))
         screen.blit(quit_text, quit_rect)
 
-        pygame.draw.rect(screen, dark_red, [465, 160, 270, 60])
+        pygame.draw.rect(screen, dark_red, [465, 160, 270, 60],border_radius=15)
         play_text_rect = play_text.get_rect(center=(465 + 270 // 2, 160 + 60 // 2))
         screen.blit(play_text, play_text_rect)
 
+
+
+        # Interactive Buttons
+        #button "Rules"
+        if 500 <= mouse[0] <= 500 + 200 and 240 <= mouse[1] <= 240 + 60:
+            pygame.draw.rect(screen, deep_black, [500, 240, 200, 60],border_radius=15)  # Cor mais clara no hover
+        else:
+            pygame.draw.rect(screen, grey, [500, 240, 200, 60],border_radius=15)
+        rules_rect = rules_text.get_rect(center=(500 + 200 // 2, 240 + 60 // 2))
+        screen.blit(rules_text, rules_rect)
+
+        # button "Quit"
+        if 500 <= mouse[0] <= 500 + 200 and 480 <= mouse[1] <= 480 + 60:
+            pygame.draw.rect(screen, deep_black, [500, 480, 200, 60],border_radius=15)
+        else:
+            pygame.draw.rect(screen, grey, [500, 480, 200, 60],border_radius=15)
+        quit_rect = quit_text.get_rect(center=(500 + 200 // 2, 480 + 60 // 2))
+        screen.blit(quit_text, quit_rect)
+
+        # button "PLAY"
+        if 465 <= mouse[0] <= 465 + 270 and 160 <= mouse[1] <= 160 + 60:
+            pygame.draw.rect(screen, white, [465, 160, 270, 60],border_radius=15)
+            play_text = stencil_font.render("PLAY", True, dark_red)
+        else:
+            pygame.draw.rect(screen, dark_red, [465, 160, 270, 60],border_radius=15)
+            play_text_rect = play_text.get_rect(center=(465 + 270 // 2, 160 + 60 // 2))
+            play_text=stencil_font.render("PLAY", True, white)
+        screen.blit(play_text, play_text_rect)
+
+
+        # button "Options"
+        if 500 <= mouse[0] <= 500 + 200 and 320 <= mouse[1] <= 320 + 60:
+            pygame.draw.rect(screen, deep_black, [500, 320, 200, 60],border_radius=15)
+        else:
+            pygame.draw.rect(screen, grey, [500, 320, 200, 60],border_radius=15)
+        options_rect = options_text.get_rect(center=(500 + 200 // 2, 320 + 60 // 2))
+        screen.blit(options_text, options_rect)
+
+        # button "Credits"
+        if 500 <= mouse[0] <= 500 + 200 and 400 <= mouse[1] <= 400 + 60:
+            pygame.draw.rect(screen, deep_black, [500, 400, 200, 60],border_radius=15)
+        else:
+            pygame.draw.rect(screen, grey, [500, 400, 200, 60],border_radius=15)
+        credits_rect = credits_text.get_rect(center=(500 + 200 // 2, 400 + 60 // 2))
+        screen.blit(credits_text, credits_rect)
 
         # Update the screen
         pygame.display.update()
@@ -147,11 +193,11 @@ def credits_():
     ocraextended_font = pygame.font.SysFont("ocraextended", 25)
 
     # text
-    joao_text =  ocraextended_font.render("João Santos", True, dark_red)
+    joao_text = ocraextended_font.render("João Santos", True, deep_black)
     joao_number =  ocraextended_font.render("20231697", True, white)
-    marta_text= ocraextended_font.render("Marta Dias", True, dark_red)
+    marta_text= ocraextended_font.render("Marta Dias", True, deep_black)
     marta_number = ocraextended_font.render("20231642", True, white)
-    rita_text= ocraextended_font.render("Rita Pinto",True, dark_red)
+    rita_text= ocraextended_font.render("Rita Pinto",True, deep_black)
     rita_number = ocraextended_font.render("20231664", True, white)
 
     # main game loop
@@ -201,7 +247,9 @@ def credits_():
 
 
         # draw a back button [x, y, width, height]
-        pygame.draw.rect(screen, dark_red, [20, 520, 140, 60])
+
+        pygame.draw.rect(screen, dark_red, [20, 520, 140, 60],border_radius=15)
+
         back_text = stencil_font.render("BACK", True, white)
         back_rect = back_text.get_rect(center=(20 + 140 // 2, 520 + 60 // 2))
         screen.blit(back_text, back_rect)
@@ -217,7 +265,7 @@ def rules_():
 
     # Fonts
     title_font = pygame.font.SysFont("stencil", 40)
-    text_font = pygame.font.SysFont("stencil", 24)
+    text_font = pygame.font.SysFont("impact ", 24)
 
     # Pages content
     pages = [
@@ -340,7 +388,7 @@ def rules_():
 
 
         # Back button
-        pygame.draw.rect(screen, dark_red,  (20, 520, 140, 60))
+        pygame.draw.rect(screen,dark_red,  (20, 520, 140, 60), border_radius=15)
         back_text = title_font.render("BACK", True, white)
         back_rect = back_text.get_rect(center=(20 + 140 // 2, 520 + 60 // 2))
         screen.blit(back_text, back_rect)
@@ -385,7 +433,12 @@ def adjust_volume(volume_level):
     pygame.mixer.music.set_volume(volume_level)
 
 def options_():
-    global volume_level
+    global volume_level,is_muted
+
+    #inicialy the game is not muted
+    if 'previous_volume_level' not in globals():
+        previous_volume_level = 0.5
+        is_muted=False
 
     # Main loop for options menu
     while True:
@@ -398,6 +451,20 @@ def options_():
             if ev.type == pygame.MOUSEBUTTONDOWN:
                 if 20 <= mouse[0] <= 20 + 140 and 520 <= mouse[1] <= 520 + 60:  # Back button
                     interface()
+                # Check if mute button is clicked
+                if (resolution[0] // 2 - 50 <= mouse[0] <= resolution[0] // 2 + 50) and \
+                        (resolution[1] // 3 + 120 <= mouse[1] <= resolution[1] // 3 + 120 + 40):  # Mute button
+                    if not is_muted:
+                        # Store the current volume level before muting
+                        previous_volume_level = volume_level
+                        volume_level = 0  # Mute the volume
+                        adjust_volume(volume_level)
+                    else:
+                        # Restore the previous volume level when unmuted
+                        volume_level = previous_volume_level
+                        adjust_volume(volume_level)
+                    is_muted = not is_muted  # Toggle mute state
+
             if ev.type == pygame.MOUSEBUTTONDOWN:
                 # Check if the click was within the volume slider area
                 if (resolution[0] // 2 - 150 <= mouse[0] <= resolution[0] // 2 + 150) and \
@@ -405,7 +472,8 @@ def options_():
                     # Calculate the volume based on the mouse X position
                     volume_level = (mouse[0] - (resolution[0] // 2 - 150)) / 300
                     volume_level = max(0.0, min(1.0, volume_level))  # Limit volume between 0 and 1
-                    adjust_volume(volume_level)
+                    if not is_muted:  # Only adjust volume if not muted
+                        adjust_volume(volume_level)
 
 
 
@@ -416,8 +484,9 @@ def options_():
                             (resolution[1] // 3 + 60 <= mouse[1] <= resolution[1] // 3 + 60 + 20):
                         # Adjust the volume based on mouse position
                         volume_level = (mouse[0] - (resolution[0] // 2 - 150)) / 300
-                        volume_level = max(0.0, min(1.0, volume_level))  # Limit volume between 0 and 1
-                        adjust_volume(volume_level)
+                        volume_level = max(0.0, min(1.0, volume_level))
+                        if not is_muted: # Only adjust volume if not muted
+                            adjust_volume(volume_level)
 
 
         # Background image
@@ -441,8 +510,29 @@ def options_():
         pygame.draw.rect(screen, white, (resolution[0] // 2 - 150 + int(volume_level * 300) - 10, resolution[1] // 3 + 60 - 5, 20, 30))  # Slider
 
 
+        # Mute button
+
+        # Mute button
+        mute_text = stencil_font.render("Mute", True, white)
+
+        # Calculate the size of the rectangle based on the text dimensions
+        rect_width = mute_text.get_width() + 20  # Adding 20 pixels of padding (10 pixels each side)
+        rect_height = mute_text.get_height() + 10  # Adding 10 pixels of padding (5 pixels top and bottom)
+
+        # Position for the mute button (centered horizontally and placed below the volume slider)
+        rect_x = resolution[0] // 2 - rect_width // 2
+        rect_y = resolution[1] // 3 + 120
+
+        # Draw the mute button rectangle
+        mute_button_color = deep_black if not is_muted else (0, 255, 0)  # Green if muted
+        pygame.draw.rect(screen, mute_button_color, (rect_x, rect_y, rect_width, rect_height), border_radius=15)
+
+        # Draw the text on top of the button
+        mute_rect = mute_text.get_rect(center=(rect_x + rect_width // 2, rect_y + rect_height // 2))
+        screen.blit(mute_text, mute_rect)
+
         # Back button
-        pygame.draw.rect(screen, dark_red,  (20, 520, 140, 60))
+        pygame.draw.rect(screen, dark_red,  (20, 520, 140, 60),border_radius=15)
         back_text = stencil_font.render("BACK", True, white)
         back_rect = back_text.get_rect(center=(20 + 140 // 2, 520 + 60 // 2))
         screen.blit(back_text, back_rect)
@@ -450,14 +540,9 @@ def options_():
 
 
 
-
-
-
-
-
-
         # Update the display
         pygame.display.update()
+
 
 
 def start_game():
