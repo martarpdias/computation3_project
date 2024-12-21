@@ -120,6 +120,16 @@ def execute_game(player: Player):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
+            # Switch guns
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_1:
+                    player.switch_guns("pistol")
+                elif event.key == pygame.K_2:
+                    player.switch_guns("rifle")
+                elif event.key == pygame.K_3:
+                    player.switch_guns("shotgun")
+                elif event.key == pygame.K_4:
+                    player.switch_guns("RPG")
 
         for enemy in enemies:
             if isinstance(enemy, shooter_rastreio):
@@ -128,6 +138,8 @@ def execute_game(player: Player):
 
         #shooting
         player.shoot(bullets)
+
+        
 
         #Spawning the chests
         current_time = pygame.time.get_ticks()
@@ -148,13 +160,20 @@ def execute_game(player: Player):
 
         # Checking for collisions between bullets and enemies
         for bullet in bullets:
-            collided_enemies = pygame.sprite.spritecollide(bullet, enemies, False)
-            for enemy in collided_enemies:
-                enemy.health -= 5  # Decrease health by 5 for each hit
-                bullet.kill()  # Destroy the bullet
-                if enemy.health <= 0:
-                    enemy.kill()  # Destroy the enemy
-                    score += 100
+            if isinstance(bullet, RPG_rocket):
+                collided_enemies = pygame.sprite.spritecollide(bullet, enemies, False)
+                if collided_enemies:
+                    bullet.explosion(enemies)
+                    bullet.kill()
+                    
+            else:
+                collided_enemies = pygame.sprite.spritecollide(bullet, enemies, True)            
+                for enemy in collided_enemies:
+                    enemy.health -= bullet.damage  # Decrease health by bullet damage
+                    bullet.kill()  # Destroy the bullet
+                    if enemy.health <= 0:
+                        enemy.kill()  # Destroy the enemy
+                        score += 100
 
         # Checking for collisions between bullets and players
         for bullet in enemy_bullets:
@@ -171,7 +190,7 @@ def execute_game(player: Player):
         for chest in collided_chest:
                 rewards = chest.open()
                 if rewards:
-                    selected_reward = chest.display_rewards_options(screen, rewards)
+                    selected_reward = chest.display_rewards_options(screen, rewards, player, enemies)
                    
         chests.draw(screen)
 
@@ -189,7 +208,15 @@ def execute_game(player: Player):
         damage = 5
         for enemy in collided_enemies:
             player.take_damage(enemy.damage)
-            
+
+        # Check if the player's speed boost has expired
+        player.check_speed_boost()
+
+        #check if the player's fire rate inrease has expired
+        player.check_fire_rate_increase()
+
+        player_group.update()
+
 
         # Check if the player is dead
         if player.health <= 0:
