@@ -4,6 +4,7 @@ from game import *  # main game logic import
 def interface():
     # initiating pygame
     pygame.init()
+    pygame.font.init()
     # creating the screen at the set resolution
     screen = pygame.display.set_mode(resolution)
 

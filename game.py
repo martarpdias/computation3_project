@@ -10,6 +10,7 @@ from bullet import Bullet
 from invicibility import Invincibility
 from deSpawner import DeSpawner
 from velocity import Velocity
+from chests import Chest
 
 
 def game_loop():
@@ -51,6 +52,11 @@ def execute_game(player: Player):
     # Initialize power-ups
     power_ups = pygame.sprite.Group()
     power_up_spawn_timer = 0
+
+    #Initialize chests and set a delay of 10 seconds for the spawn
+    chests = pygame.sprite.Group()
+    chest_spwan_delay = 10000
+    last_chest_spwan_time = pygame.time.get_ticks()
 
     # Round management
     current_round = 1
@@ -130,6 +136,7 @@ def execute_game(player: Player):
         else:
             bar_color = (255, 0, 0)  # Red
 
+
         # Add rounded corners to the time bar
         pygame.draw.rect(screen, (255, 255, 255), (20, height - 40, width - 40, 25), border_radius=10)  # Background bar
         pygame.draw.rect(screen, bar_color, (30, height - 35, bar_width, 15), border_radius=10)  # Time bar with rounded corners
@@ -202,6 +209,16 @@ def execute_game(player: Player):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
+            # Switch guns
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_1:
+                    player.switch_guns("pistol")
+                elif event.key == pygame.K_2:
+                    player.switch_guns("rifle")
+                elif event.key == pygame.K_3:
+                    player.switch_guns("shotgun")
+                elif event.key == pygame.K_4:
+                    player.switch_guns("RPG")
 
         for enemy in enemies:
             if isinstance(enemy, shooter_rastreio):
@@ -212,15 +229,40 @@ def execute_game(player: Player):
         player.shoot(bullets)
 
         
+
+        #Spawning the chests
+        current_time = pygame.time.get_ticks()
+        if current_time - last_chest_spwan_time > chest_spwan_delay:
+            if random.random() < 0.05:
+                new_chest = Chest()
+                new_chest.spawner()
+                chests.add(new_chest)
+                last_chest_spwan_time = current_time
+
+
+        #spawning the enemies
+        if enemy_spawn_timer<=0:
+            enemy_type = random.choice([Enemy, fast_enemy, shooter_rastreio])
+            new_enemy = enemy_type()
+            enemies.add(new_enemy)
+            enemy_spawn_timer = enemy_spawn_rate
+
         # Checking for collisions between bullets and enemies
         for bullet in bullets:
-            collided_enemies = pygame.sprite.spritecollide(bullet, enemies, False)
-            for enemy in collided_enemies:
-                enemy.health -= 5  # Decrease health by 5 for each hit
-                bullet.kill()  # Destroy the bullet
-                if enemy.health <= 0:
-                    enemy.kill()  # Destroy the enemy
-                    score += 100
+            if isinstance(bullet, RPG_rocket):
+                collided_enemies = pygame.sprite.spritecollide(bullet, enemies, False)
+                if collided_enemies:
+                    bullet.explosion(enemies)
+                    bullet.kill()
+                    
+            else:
+                collided_enemies = pygame.sprite.spritecollide(bullet, enemies, True)            
+                for enemy in collided_enemies:
+                    enemy.health -= bullet.damage  # Decrease health by bullet damage
+                    bullet.kill()  # Destroy the bullet
+                    if enemy.health <= 0:
+                        enemy.kill()  # Destroy the enemy
+                        score += 100
 
         # Checking for collisions between bullets and players
         for bullet in enemy_bullets:
@@ -231,6 +273,17 @@ def execute_game(player: Player):
             elif player.invincible == True and collided_player:
                 bullet.kill()
 
+        #check for collision between chest and player
+        collided_chest = pygame.sprite.spritecollide(player, chests, False)
+        for chest in collided_chest:
+                rewards = chest.open()
+                if rewards:
+                    selected_reward = chest.display_rewards_options(screen, rewards, player, enemies)
+                   
+        chests.draw(screen)
+
+        # Update the enemy spawn timer
+        enemy_spawn_timer -= 1
 
         # Update positions
         player_group.update()
@@ -241,8 +294,15 @@ def execute_game(player: Player):
         # Check collisions between player and enemies
         collided_enemies = pygame.sprite.spritecollide(player, enemies, False)
         for enemy in collided_enemies:
-            enemy.deal_damage(player)
+            player.take_damage(enemy.damage)
 
+        # Check if the player's speed boost has expired
+        player.check_speed_boost()
+
+        #check if the player's fire rate inrease has expired
+        player.check_fire_rate_increase()
+
+        player_group.update()
 
 
         # Check if the player is dead
@@ -292,6 +352,28 @@ def execute_game(player: Player):
 
         # Update the display
         pygame.display.flip()
+
+#pause game function
+def pause(screen, width, height):
+    screen = pygame.display.set_mode((resolution))
+    font = pygame.font.SysFont("segoeuiblack", 100)
+    text = font.render("Paused", True, (255, 255, 255))
+    text_rect = text.get_rect(center=(width // 2, height // 2))
+    # Display the text at the center
+    screen.blit(text, text_rect)
+    pygame.display.flip()
+
+    #loop to keep the game paused until the player unpauses
+    paused = True
+    while paused:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    paused = False        
+        
+
 
 
 def show_transition_screen(screen):
