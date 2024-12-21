@@ -34,23 +34,3 @@ texts = [
     ocraextended_font.render("OCR A Extended Font", True, white),
     segoeuiblack_font.render("Segoe UI Black Font", True, white),
 ]
-
-# Display text on the screen
-screen.fill(black)  # Set background to black
-y = 50
-for text in texts:
-    screen.blit(text, (50, y))
-    y += 60  # Increment Y position for each font
-
-pygame.display.flip()
-
-# Main loop
-running = True
-while running:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-
-pygame.quit()
-
-
