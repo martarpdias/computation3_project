@@ -15,7 +15,8 @@ class DeSpawner(PowerUp):
         game["enemy_spawn_rate"] = int(game["enemy_spawn_rate"]) * 3  # Spawn slower
 
         # Kill a random number of enemies on the screen
-        enemies_to_kill = random.randint(1, len(game["enemies"]))  # Choose random number
+        enemies_to_kill = random.randint(1, max(1, len(game["enemies"])))
+        # Choose random number
         enemies_killed = 0
         for enemy in list(game["enemies"]):  # Convert to list to avoid iteration issues
             if enemies_killed >= enemies_to_kill:

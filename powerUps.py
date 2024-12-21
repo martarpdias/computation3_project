@@ -22,7 +22,7 @@ class PowerUp(pygame.sprite.Sprite, ABC):
         for i in range(1, 4):  # Add multiple layers of glow
             pygame.draw.circle(
                 self.image,
-                (self.color[0], self.color[1], self.color[2], 255 // (i * 2)),  # Fading alpha for glow
+                (self.color[0], self.color[1], self.color[2], 255 // (i * 2)),  # Fading for glow
                 (center, center),
                 self.radius + i * 5,  # Outer radius for the glow
             )

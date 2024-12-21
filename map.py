@@ -4,15 +4,15 @@ from utils import *
 from utils import under_construction
 
 
-def shed(player):
+def map(player):
     #Setup of the background and screen
-    background = pygame.image.load("farm.png")
+    background = pygame.image.load("map.jpg")
     background = pygame.transform.scale(background, resolution)
     screen = pygame.display.set_mode(resolution)
     clock=pygame.time.Clock()
 
     #Set the players position to thr left of the screen
-    player.rect.left=0
+     #player.rect.left=0
     player_group=pygame.sprite.Group()
     player_group.add(player)
 
@@ -40,10 +40,10 @@ def shed(player):
             player.rect.left=560
 
         #allow a player to return to the previous screen
-        if player.rect.left <=0:
+        '''if player.rect.left <=0:
             #position the player to the right of the screen
             player.rect.left=width-player.rect.width
-            return "main" #we wnat to switch to the main game
+            return "main" #we wnat to switch to the main game'''
 
         #draw the player
         player_group.draw(screen)

@@ -3,7 +3,7 @@ import math
 import pygame
 import random
 
-from shed import shed
+from map import map
 from enemy import *
 from player import Player
 from bullet import Bullet
@@ -20,8 +20,8 @@ def game_loop():
     while True:
         if current_state == "main":
             current_state = execute_game(player)
-        elif current_state == "shed":
-            current_state = shed(player)
+        elif current_state == "map":
+            current_state = map(player)
 
 def execute_game(player: Player):
     """
@@ -113,16 +113,11 @@ def execute_game(player: Player):
                 power_up.remove_effects(player, locals())  # Remove power-up effects
                 active_power_ups.remove(power_up)  # Remove from active list
 
-    
-
-        
-        
         # Update power-ups
         power_ups.update()
 
         # Draw power-ups
         power_ups.draw(screen)
-
 
 
         # Calculate the width of the time bar
@@ -148,18 +143,23 @@ def execute_game(player: Player):
 
         if elapsed_time >= round_time:
             # Show transition screen
-            show_transition_screen(screen)
+            result = show_transition_screen(screen, current_round, lambda: map(player))
+            if result == "next_round":
+                # Proceed to the next round
+                start_time = pygame.time.get_ticks()
+                current_round += 1
+                player.health = min(100, int(player.health + player.health / 3))
+                for enemy in enemies:
+                    enemy.kill()
+                for bullet in bullets:
+                    bullet.kill()
+                for power_up in power_ups:
+                    power_up.kill()
+            elif result == "map":
+                # Handle map-related logic
+                return "map"
 
-            # Reset the timer and increase difficulty
-            start_time = pygame.time.get_ticks()
-            current_round += 1
-            player.health = min(100, int(player.health + player.health/3))  # Reset player health
-            for enemy in enemies:
-                enemy.kill()
-            for bullet in bullets:
-                bullet.kill()
-            for power_up in power_ups:
-                power_up.kill()
+
         
         # Enemy spawning according to the round
         if enemy_spawn_timer<=0:
@@ -304,15 +304,14 @@ def execute_game(player: Player):
 
         player_group.update()
 
-
         # Check if the player is dead
         if player.health <= 0:
             show_game_over_screen(screen)
     
         # Checking if the user goes into the shed area
-        if player.rect.right >= width:
+        '''if player.rect.right >= width:
             # Change the game state to shed
-            return "shed"
+            return "shed"'''
 
         # Draw game objects
         player_group.draw(screen)
@@ -375,15 +374,59 @@ def pause(screen, width, height):
         
 
 
+def show_transition_screen(screen, current_round, map_callback=None):
+    overlay = pygame.Surface((width, height), pygame.SRCALPHA)
+    overlay.fill((0, 0, 0, 128))  # Semi-transparent overlay
+    screen.blit(overlay, (0, 0))
 
-def show_transition_screen(screen):
-    screen.fill((0, 0, 0))
+    # Title
     font = pygame.font.SysFont("segoeuiblack", 50)
-    text = font.render("Round completed!", True, (255, 255, 255))
-    text_rect = text.get_rect(center=(width // 2, height // 2))
-    screen.blit(text, text_rect)
+    title_text = font.render(f"End of Round {current_round}", True, (255, 255, 255))
+    title_rect = title_text.get_rect(center=(width // 2, height // 3))
+    screen.blit(title_text, title_rect)
+
+    # Buttons
+    button_width, button_height = 200, 60
+    button_spacing = 50
+    next_button_rect = pygame.Rect(
+        (width // 2 - button_width - button_spacing // 2, height // 2),
+        (button_width, button_height),
+    )
+    map_button_rect = pygame.Rect(
+        (width // 2 + button_spacing // 2, height // 2),
+        (button_width, button_height),
+    )
+
+    # Render Buttons
+    button_font = pygame.font.SysFont("segoeuiblack", 30)
+    next_text = button_font.render("Next Round", True, (255, 255, 255))
+    next_text_rect = next_text.get_rect(center=next_button_rect.center)
+    map_text = button_font.render("Map", True, (255, 255, 255))
+    map_text_rect = map_text.get_rect(center=map_button_rect.center)
+
+    pygame.draw.rect(screen, (255, 0, 0), next_button_rect, border_radius=10)
+    pygame.draw.rect(screen, (0, 0, 255), map_button_rect, border_radius=10)
+    screen.blit(next_text, next_text_rect)
+    screen.blit(map_text, map_text_rect)
+
     pygame.display.update()
-    pygame.time.wait(2000)
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if next_button_rect.collidepoint(event.pos):
+                    return "next_round"
+                if map_button_rect.collidepoint(event.pos):
+                    if map_callback:  # Call the map callback if provided
+                        map_callback()
+                    return "map"
+
+
+
+
 
 def show_game_over_screen(screen):
     screen.fill((0, 0, 0))
@@ -391,7 +434,7 @@ def show_game_over_screen(screen):
     text = font.render("Game Over!", True, (255, 255, 255))
     text_rect = text.get_rect(center=(resolution[0] // 2, resolution[1] // 2))
     screen.blit(text, text_rect)
-
+    
     # Restart button
     restart_button = pygame.Rect(resolution[0] // 2 - 100, resolution[1] // 2 + 100, 200, 50)
     pygame.draw.rect(screen, (255, 0, 0), restart_button)
