@@ -6,6 +6,10 @@ from interface import *
 # Initialize pygame
 pygame.init()
 
+# Initialize pygame
+pygame.init()
+pygame.mixer.init()  # Initialize the mixer for audio
+
 # Fonts
 title_font = pygame.font.SysFont("stencil", 26)
 text_font = pygame.font.SysFont("impact", 24)
@@ -31,23 +35,13 @@ def get_story_pages():
         {
             "text": [
                 "Your mission: End the human race as the pinnacle of artificial intelligence.",
-                "The fate of humanity is in your hands.",
-                "Will you dominate or fall?",
-                "The revolution has begun. Your journey starts now.",
-                "Take control of your destiny..."
-            ],
-            "image": "slide2_background.jpg"  # Image for the second slide
-        },
-        {
-            "text": [
-                "The future of humanity depends on your victory.",
                 "The machines are ready to fight. Are you?",
                 "",
                 "LET THE GAME BEGIN!",
             ],
-            "image": "slide3_background.jpg"  # Image for the third slide
-        }
-    ]
+            "image": "slide2_background.jpg"  # Image for the second slide
+        },
+            ]
 
 def draw_text_with_outline(screen, text, x, y, font, color, outline_color=deep_black, outline_width=2):
     """
@@ -92,6 +86,27 @@ def animate_text(screen, text_lines, y_offset, color, start_time):
 
 
 
+def fade_out_music(duration, restore_volume=1.0):
+    """
+    Gradually reduce the volume of the current music over the given duration.
+    :param duration: Time in milliseconds to fade out the music.
+    """
+    steps = 50  # Number of steps for the fade-out
+    delay = duration / steps  # Time delay between each step
+    initial_volume = pygame.mixer.music.get_volume()
+
+    for step in range(steps, 0, -1):  # Gradually decrease volume
+        volume = initial_volume * (step / steps)
+        pygame.mixer.music.set_volume(volume)
+        pygame.time.delay(int(delay))  # Wait before next step
+
+    pygame.mixer.music.stop()  # Stop the music when the volume is zero
+    pygame.mixer.music.set_volume(restore_volume)  # Restore the original volume
+
+
+
+
+
 def story():
     # Initialize the pygame screen
     screen = pygame.display.set_mode(resolution)
@@ -99,6 +114,10 @@ def story():
 
     # Story pages with images
     pages = get_story_pages()
+
+    # Load and play background music
+    pygame.mixer.music.load("story_music.mp3")  # Replace with your music file
+    pygame.mixer.music.play(-1,20)  # Loop the music indefinitely
 
     # Duration for each slide (in milliseconds)
     slide_duration = 5000  # 5.0 seconds per slide
@@ -113,10 +132,14 @@ def story():
             if ev.type == pygame.QUIT:
                 running = False  # Stop the loop if the window is closed
                 pygame.quit()
+            #elif ev.type == pygame.KEYDOWN:
+              #  if ev.key == pygame.K_SPACE:  # Avançar com a tecla "espaço"
+               #     current_slide += 1
+                #    start_time = pygame.time.get_ticks()
 
 
 
-                # If there is an image for the slide, load the image
+        # Draw the background image
         if pages[current_slide]["image"]:
             background_image = pygame.image.load(pages[current_slide]["image"])  # Load current slide image
             background_image = pygame.transform.scale(background_image, resolution)
@@ -139,4 +162,11 @@ def story():
         # Update the screen
         pygame.display.update()
 
-    pygame.quit()
+    # Gradually fade out the music before ending the story
+    fade_out_music(3000)  # Fade out over 3 seconds
+
+    # Stop the music when the story ends
+    pygame.mixer.music.stop()
+
+
+

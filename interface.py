@@ -1,5 +1,9 @@
 from utils import *  # utils contains helper functions (imported pygame)
 from game import *  # main game logic import
+from game_story import story
+
+
+
 
 def interface():
     # initiating pygame
@@ -46,6 +50,7 @@ def interface():
 
     # Main game loop
     while True:
+        mouse = pygame.mouse.get_pos()
         # Event handling
         for ev in pygame.event.get():
             if ev.type == pygame.QUIT:
@@ -445,6 +450,8 @@ def options_():
         for ev in pygame.event.get():
             if ev.type == pygame.QUIT:
                 pygame.quit()
+
+
             if ev.type == pygame.MOUSEBUTTONDOWN:
                 if 20 <= mouse[0] <= 20 + 140 and 520 <= mouse[1] <= 520 + 60:  # Back button
                     interface()

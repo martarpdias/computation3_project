@@ -10,7 +10,7 @@ enemy_bullet = pygame.sprite.Group()
 
 
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self):
+    def __init__(self, image_path):
         """
         Initialize the enemy instance
         """
@@ -19,6 +19,13 @@ class Enemy(pygame.sprite.Sprite):
         self.image = pygame.Surface((enemy_size, enemy_size))
         self.image.fill(red)
         self.rect = self.image.get_rect()
+
+
+        # Load the enemy image and scale it to the desired size
+        #self.image = pygame.image.load(image_path)
+        #self.image = pygame.transform.scale(self.image, (enemy_size, enemy_size))
+        #self.rect = self.image.get_rect()
+
 
         #Positioning
         self.rect.x = random.randint(0, width - enemy_size)
@@ -60,6 +67,7 @@ class fast_enemy(Enemy):
         super().__init__()
         #change the appearence
         self.image.fill(blue)
+
 
         #Random speed
         self.speed = random.randint(4, 5)
