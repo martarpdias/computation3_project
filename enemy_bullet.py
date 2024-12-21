@@ -1,4 +1,4 @@
-from bullet import Bullet
+#from bullet import Bullet
 
-class enemy_bullet(Bullet, player):
+#class enemy_bullet(Bullet, player):
     

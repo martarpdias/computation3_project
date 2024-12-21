@@ -57,6 +57,7 @@ class fast_enemy(Enemy):
         #change the appearence
         self.image.fill(blue)
 
+
         #Random speed
         self.speed = random.randint(4, 5)
         #Health
