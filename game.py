@@ -135,20 +135,6 @@ def execute_game(player: Player):
         screen.blit(time_text, (25, height - 70))
 
         if elapsed_time >= round_time:
-<<<<<<< Updated upstream
-            action = show_transition_screen(screen, current_round)
-            if player.rect.right >= width:
-                return "shed"  # Change the game state to shed
-            else:
-                if player.rect.right >= width:  # Block player
-                    player.rect.right = width
-
-            if action == "next_round":
-                # Reset the timer and increase difficulty
-                start_time = pygame.time.get_ticks()
-                current_round += 1
-                player.health = min(100, int(player.health + player.health / 3))  # Reset player health
-=======
             # Show transition screen
             result = show_transition_screen(screen, current_round, lambda: map(player))
             if result == "next_round":
@@ -156,24 +142,18 @@ def execute_game(player: Player):
                 start_time = pygame.time.get_ticks()
                 current_round += 1
                 player.health = min(100, int(player.health + player.health / 3))
->>>>>>> Stashed changes
                 for enemy in enemies:
                     enemy.kill()
                 for bullet in bullets:
                     bullet.kill()
                 for power_up in power_ups:
                     power_up.kill()
-<<<<<<< Updated upstream
-            elif action == "shed":
-                return "shed" # Transition to the shed state
-
-
-=======
             elif result == "map":
+                # Handle map-related logic
                 return "map"
 
+
         
->>>>>>> Stashed changes
         # Enemy spawning according to the round
         if enemy_spawn_timer<=0:
             if current_round == 1:
@@ -312,121 +292,57 @@ def execute_game(player: Player):
         # Update the display
         pygame.display.flip()
 
-
-<<<<<<< Updated upstream
-def show_transition_screen(screen, current_round):
-    """
-    Displays a transition screen with the round number and two buttons: 'Next Round' and 'Map'.
-    """
-    # Create a semi-transparent black surface
+def show_transition_screen(screen, current_round, map_callback=None):
     overlay = pygame.Surface((width, height), pygame.SRCALPHA)
-    overlay.fill((0, 0, 0, 128))  # Black with 50% transparency (128 alpha)
-    screen.blit(overlay, (0, 0))  # This should place the translucent black on the screen
+    overlay.fill((0, 0, 0, 128))  # Semi-transparent overlay
+    screen.blit(overlay, (0, 0))
 
-
-    # Render the title
+    # Title
     font = pygame.font.SysFont("segoeuiblack", 50)
     title_text = font.render(f"End of Round {current_round}", True, (255, 255, 255))
-    title_rect = title_text.get_rect(center=(width // 2, height // 3))  # Position at the top-center
+    title_rect = title_text.get_rect(center=(width // 2, height // 3))
+    screen.blit(title_text, title_rect)
 
-    # Define button dimensions
-    button_width = 200
-    button_height = 60
+    # Buttons
+    button_width, button_height = 200, 60
     button_spacing = 50
     next_button_rect = pygame.Rect(
-        (width // 2 - button_width - button_spacing // 2, height // 2),  # Left of center
-        (button_width, button_height)
+        (width // 2 - button_width - button_spacing // 2, height // 2),
+        (button_width, button_height),
     )
     map_button_rect = pygame.Rect(
-        (width // 2 + button_spacing // 2, height // 2),  # Right of center
-        (button_width, button_height)
+        (width // 2 + button_spacing // 2, height // 2),
+        (button_width, button_height),
     )
 
-    # Render button labels
+    # Render Buttons
     button_font = pygame.font.SysFont("segoeuiblack", 30)
     next_text = button_font.render("Next Round", True, (255, 255, 255))
     next_text_rect = next_text.get_rect(center=next_button_rect.center)
     map_text = button_font.render("Map", True, (255, 255, 255))
     map_text_rect = map_text.get_rect(center=map_button_rect.center)
 
-    while True:
-        # Draw the overlay and text
-        screen.blit(overlay, (0, 0))
-        screen.blit(title_text, title_rect)
-
-        # Draw the buttons
-        pygame.draw.rect(screen, (255, 0, 0), next_button_rect, border_radius=10)  # Red for "Next Round"
-        pygame.draw.rect(screen, (0, 0, 255), map_button_rect, border_radius=10)   # Blue for "Map"
-        screen.blit(next_text, next_text_rect)
-        screen.blit(map_text, map_text_rect)
-
-        # Update the display
-        pygame.display.update()
-
-        # Handle events
-=======
-def show_transition_screen(screen, current_round, map_function, player):
-    """
-    Displays a transition screen after a round is completed.
-    
-    Args:
-        screen (pygame.Surface): The game screen to render on.
-        current_round (int): The current round number.
-        map_function (function): The map function to call when the "Map" button is clicked.
-    """
-    player_group = pygame.sprite.Group()
-    player_group.add(player)
-
-    screen.fill((0, 0, 0))
-    font = pygame.font.SysFont("segoeuiblack", 50)
-    
-    # Round completion message
-    text = font.render(f"Round {current_round} completed!", True, (255, 255, 255))
-    text_rect = text.get_rect(center=(width // 2, height // 3))
-    screen.blit(text, text_rect)
-    
-    # Button font
-    button_font = pygame.font.SysFont("segoeuiblack", 30)
-    
-    # Next Round button
-    next_button = pygame.Rect(width // 2 - 150, height // 2, 300, 50)
-    pygame.draw.rect(screen, (0, 255, 0), next_button, border_radius=10)
-    next_text = button_font.render("Next Round", True, (0, 0, 0))
-    next_text_rect = next_text.get_rect(center=next_button.center)
+    pygame.draw.rect(screen, (255, 0, 0), next_button_rect, border_radius=10)
+    pygame.draw.rect(screen, (0, 0, 255), map_button_rect, border_radius=10)
     screen.blit(next_text, next_text_rect)
-    
-    # Map button
-    map_button = pygame.Rect(width // 2 - 150, height // 2 + 100, 300, 50)
-    pygame.draw.rect(screen, (0, 0, 255), map_button, border_radius=10)
-    map_text = button_font.render("Map", True, (255, 255, 255))
-    map_text_rect = map_text.get_rect(center=map_button.center)
     screen.blit(map_text, map_text_rect)
-    
+
     pygame.display.update()
-    
-    # Wait for user interaction
+
     while True:
->>>>>>> Stashed changes
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
-<<<<<<< Updated upstream
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                if next_button_rect.collidepoint(event.pos):
-                    return "next_round"  # User chose to start the next round
-                elif map_button_rect.collidepoint(event.pos):
-                    return "shed"  # User chose to go to the shed
-=======
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if next_button.collidepoint(event.pos):
+                if next_button_rect.collidepoint(event.pos):
                     return "next_round"
-                if map_button.collidepoint(event.pos):
-                    map(player)
+                if map_button_rect.collidepoint(event.pos):
+                    if map_callback:  # Call the map callback if provided
+                        map_callback()
                     return "map"
 
 
->>>>>>> Stashed changes
 
 
 
