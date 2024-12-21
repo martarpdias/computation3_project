@@ -11,6 +11,7 @@ from invicibility import Invincibility
 from deSpawner import DeSpawner
 from velocity import Velocity
 from chests import Chest
+from game_helpers import *
 
 
 
@@ -94,16 +95,8 @@ def execute_game(player: Player):
                     selected_bullet_type = 2  # Fast bullet
                 elif event.key == pygame.K_3:
                     selected_bullet_type = 3  # Large bullet
-
-        # automatic shooting
-        if shooting_timer <= 0:  # Shoot every few frames
-            directions = [math.radians(0), math.radians(90), math.radians(180), math.radians(270)]
-
-            for direction in directions:
-                bullet = shoot_bullet(player.rect.centerx, player.rect.centery, direction, selected_bullet_type)
-                bullets.add(bullet)
-
-            shooting_timer = fps // 2  # Adjust shooting rate
+                elif event.key == pygame.K_4:
+                    selected_bullet_type = 4
 
         shooting_timer -= 0.5  # Decrement the shooting timer
         # Update and draw bullets
