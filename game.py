@@ -46,16 +46,14 @@ def execute_game(player: Player):
 
     # Initialize the enemy group
     enemies = pygame.sprite.Group()
-    enemy_spawn_timer = fps * 2
 
     # Initialize power-ups
     power_ups = pygame.sprite.Group()
     power_up_spawn_timer = 0
 
     # Round management
-    current_round = 1
-    final_round = 10
-    round_time = 20  # seconds per round
+    current_level = 1
+    level_time = 20  # seconds per round
     start_time = pygame.time.get_ticks()  # Get initial time for the round    
 
     # Initialize lists for active power-ups
@@ -71,7 +69,7 @@ def execute_game(player: Player):
 
         # Calculate remaining time
         elapsed_time = (pygame.time.get_ticks() - start_time) / 1000  # Time in seconds
-        time_left = max(0, round_time - elapsed_time)
+        time_left = max(0, level_time - elapsed_time)
 
         # Update player
         player_group.update()
@@ -115,12 +113,12 @@ def execute_game(player: Player):
 
 
         # Calculate the width of the time bar
-        bar_width = int((time_left / round_time) * (width - 40))  # Proportional to remaining time
+        bar_width = int((time_left / level_time) * (width - 40))  # Proportional to remaining time
 
         # Set the color of the time bar (optional: green -> yellow -> red transition)
-        if time_left > round_time * 0.5:
+        if time_left > level_time * 0.5:
             bar_color = (0, 255, 0)  # Green
-        elif time_left > round_time * 0.2:
+        elif time_left > level_time * 0.2:
             bar_color = (255, 165, 0)  # Orange
         else:
             bar_color = (255, 0, 0)  # Red
@@ -134,13 +132,13 @@ def execute_game(player: Player):
         time_text = font.render(f"Time: {int(time_left)}s", True, (255, 255, 255))
         screen.blit(time_text, (25, height - 70))
 
-        if elapsed_time >= round_time:
+        if elapsed_time >= level_time:
             # Show transition screen
-            result = show_transition_screen(screen, current_round, lambda: map(player))
+            result = show_transition_screen(screen, current_level, lambda: map(player))
             if result == "next_round":
                 # Proceed to the next round
                 start_time = pygame.time.get_ticks()
-                current_round += 1
+                current_level += 1
                 player.health = min(100, int(player.health + player.health / 3))
                 for enemy in enemies:
                     enemy.kill()
@@ -153,40 +151,24 @@ def execute_game(player: Player):
                 return "map"
 
 
+        # Spawn enemies based on the current round
         
-        # Enemy spawning according to the round
-        if enemy_spawn_timer<=0:
-            if current_round == 1:
-                enemy_spawn_rate = fps * 2
-                enemies.add(Enemy())
-                enemy_spawn_timer = enemy_spawn_rate
-            elif current_round == 2:
-                enemy_spawn_rate = fps * 1.5
-                enemies.add(Enemy())
-                enemy_spawn_timer = enemy_spawn_rate
-            elif current_round == 3:
-                enemy_spawn_rate = fps * 2
-                enemy_type = random.choice([Enemy, fast_enemy])
-                new_enemy = enemy_type()
+        # Access level data during the game
+        level_data = LEVELS.get(current_level, {})  # Safeguard in case current_level doesn't exist
+        enemy_types = level_data.get("enemy_types", [])
+        spawn_rate = level_data.get("spawn_rate", fps * 2)  # Default spawn rate if missing
+
+        # Spawn enemies based on the current level
+        if len(enemies) < current_level * 5:  
+            # Example: Max enemies scales with level (adjust as needed)
+            if enemy_types:  # Ensure there are valid enemy types
+                enemy_type = random.choice(enemy_types)
+                new_enemy = enemy_type()  # Instantiate the enemy
                 enemies.add(new_enemy)
-                enemy_spawn_timer = enemy_spawn_rate
-            elif current_round == 4:
-                enemy_spawn_rate = fps * 1.5
-                enemy_type = random.choice([Enemy, fast_enemy])
-                new_enemy = enemy_type()
-                enemies.add(new_enemy)
-                enemy_spawn_timer = enemy_spawn_rate
-            elif current_round == 5:
-                enemy_spawn_rate = fps * 2
-                enemy_type = random.choice([Enemy, fast_enemy, shooter_rastreio])
-                new_enemy = enemy_type()
-                enemies.add(new_enemy)
-                enemy_spawn_timer = enemy_spawn_rate
-        enemy_spawn_timer -= 1
 
 
         # Display round number
-        round_text = font.render(f"Round: {current_round}", True, (255, 255, 255))
+        round_text = font.render(f"Level: {current_level}", True, (255, 255, 255))
         screen.blit(round_text, (160, 45))
 
         # Draw player health bar
@@ -248,10 +230,6 @@ def execute_game(player: Player):
         if player.health <= 0:
             show_game_over_screen(screen)
     
-        # Checking if the user goes into the shed area
-        '''if player.rect.right >= width:
-            # Change the game state to shed
-            return "shed"'''
 
         # Draw game objects
         player_group.draw(screen)
@@ -292,14 +270,14 @@ def execute_game(player: Player):
         # Update the display
         pygame.display.flip()
 
-def show_transition_screen(screen, current_round, map_callback=None):
+def show_transition_screen(screen, current_level, map_callback=None):
     overlay = pygame.Surface((width, height), pygame.SRCALPHA)
     overlay.fill((0, 0, 0, 128))  # Semi-transparent overlay
     screen.blit(overlay, (0, 0))
 
     # Title
     font = pygame.font.SysFont("segoeuiblack", 50)
-    title_text = font.render(f"End of Round {current_round}", True, (255, 255, 255))
+    title_text = font.render(f"End of Level {current_level}", True, (255, 255, 255))
     title_rect = title_text.get_rect(center=(width // 2, height // 3))
     screen.blit(title_text, title_rect)
 
