@@ -35,7 +35,7 @@ LEVELS = {
     },
     2: {
         "enemy_types": [Enemy],
-        "spawn_rate": fps * 1.5,  # Faster spawning
+        "spawn_rate": fps *1.5,  # Faster spawning
     },
     3: {
         "enemy_types": [Enemy, fast_enemy],

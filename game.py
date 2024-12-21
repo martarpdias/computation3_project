@@ -261,11 +261,20 @@ def execute_game(player: Player):
 
 
         #spawning the enemies
-        if enemy_spawn_timer<=0:
-            enemy_type = random.choice([Enemy, fast_enemy, shooter_rastreio])
-            new_enemy = enemy_type()
+        current_level = 1  # Start with level 1
+
+        # Access level data during the game
+        level_data = LEVELS[current_level]
+        enemy_types = level_data["enemy_types"]
+        spawn_rate = level_data["spawn_rate"]
+        enemy_count = level_data["enemy_count"]
+
+        # Spawn enemies based on the current level
+        if len(enemies) < enemy_count:
+            enemy_type = random.choice(enemy_types)
+            new_enemy = enemy_type()  # Instantiate the enemy
             enemies.add(new_enemy)
-            enemy_spawn_timer = enemy_spawn_rate
+
 
         # Checking for collisions between bullets and enemies
         for bullet in bullets:
@@ -314,7 +323,7 @@ def execute_game(player: Player):
         # Check collisions between player and enemies
         collided_enemies = pygame.sprite.spritecollide(player, enemies, False)
         for enemy in collided_enemies:
-            player.take_damage(enemy.damage)
+            enemy.deal_damage(player)
 
         # Check if the player's speed boost has expired
         player.check_speed_boost()
@@ -392,7 +401,7 @@ def pause(screen, width, height):
         
 
 
-def show_transition_screen(screen, current_round, map_callback=None):
+def show_transition_screen(screen, current_level, map_callback=None):
     overlay = pygame.Surface((width, height), pygame.SRCALPHA)
     overlay.fill((0, 0, 0, 128))  # Semi-transparent overlay
     screen.blit(overlay, (0, 0))

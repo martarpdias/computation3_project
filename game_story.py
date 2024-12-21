@@ -124,7 +124,6 @@ def story():
     current_slide = 0
     start_time = pygame.time.get_ticks()  # Start time
     running = True  # Initialize running variable
-    skip_button_rect = pygame.Rect(0, 0, 0, 0)  # Initialize the skip button rectangle
 
     while running and current_slide < len(pages):
         for ev in pygame.event.get():
