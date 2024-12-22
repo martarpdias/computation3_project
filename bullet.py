@@ -125,7 +125,7 @@ class RPG_rocket(Bullet):
         self.damage = 30
         self.explosion_radius = 100
         
-    def explosion(self, enemies:pygame.sprite.Group):
+    def explosion(self, enemies:pygame.sprite.Group, player):
         '''
         the explosion will cause damage to all the enemies in proximity
 
@@ -142,6 +142,7 @@ class RPG_rocket(Bullet):
             if distance <= self.explosion_radius:
                 enemy.health -= self.damage
                 if enemy.health <= 0:
+                    player.coins += enemy.coin_value
                     enemy.kill()
         self.kill()
 
