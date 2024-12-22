@@ -51,6 +51,8 @@ class Player(pygame.sprite.Sprite):
         self.shotgun_fire_rate = 60
         self.RPG_fire_rate = 90
         self.fire_rate_timer = None
+        self.coins = 0
+
 
         #guns avaliable to the player
         self.guns = {
@@ -127,23 +129,6 @@ class Player(pygame.sprite.Sprite):
         used to apply health potions to the player and garntee it doesn't go over the max health
         '''
         self.health = min(self.health + amount, self.max_health)
-
-    def apply_speed_potion(self):
-        '''
-        used to increase the damage player deals
-        '''
-        self.speed += 2
-        self.boost_start_time = pygame.time.get_ticks()
-
-    def check_speed_boost(self):
-        '''
-        check if the speed boost is still active
-        '''
-        if self.boost_start_time is not None:
-            current_time = pygame.time.get_ticks()
-            if current_time - self.boost_start_time >= self.boost_duration:
-                self.speed = self.normal_speed
-                self.boost_start_time = None
         
 
     def health_increase(self):
