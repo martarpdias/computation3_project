@@ -10,16 +10,23 @@ class Chest(pygame.sprite.Sprite):
     '''
     Initialize the chest 
     '''
-    def __init__(self):
+    def __init__(self, image_path="chest.jpeg"):
         super().__init__()
-        self.x = random.randint(0, width - 50)
-        self.y = random.randint(0, height - 50)
-        self.open_chest = False
-        self.image = pygame.Surface((50, 50))
-        self.image.fill(glowing_yellow)
-        self.rect = self.image.get_rect()
-        self.rect.topleft = (self.x, self.y)
+        # Load the image for the chest
+        self.image = pygame.image.load(image_path).convert_alpha()
 
+        # Scale the image to an appropriate size
+        chest_size = (50, 50)  # Adjust size as needed
+        self.image = pygame.transform.scale(self.image, chest_size)
+
+        # Get the rectangle for positioning
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (
+            random.randint(0, width - chest_size[0]),
+            random.randint(0, height - chest_size[1])
+        )
+
+        self.open_chest = False
         self.spawn_time = pygame.time.get_ticks()
 
     def spawner(self):

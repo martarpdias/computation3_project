@@ -325,7 +325,7 @@ def execute_game(player: Player,game_state,score, current_round):
                 enemies.add(new_enemy)
                 enemy_spawn_timer = enemy_spawn_rate
 
-            else:
+            elif current_round == 10:
                 enemy_spawn_rate = fps * 2
                 enemies.add(Boss("boss.png"))
                 enemy_spawn_timer = enemy_spawn_rate
@@ -372,7 +372,6 @@ def execute_game(player: Player,game_state,score, current_round):
         player.shoot(bullets)
 
         
-
         #Spawning the chests
         current_time = pygame.time.get_ticks()
         if current_time - last_chest_spwan_time > chest_spwan_delay:
@@ -382,13 +381,6 @@ def execute_game(player: Player,game_state,score, current_round):
                 chests.add(new_chest)
                 last_chest_spwan_time = current_time
 
-
-        #spawning the enemies
-        '''if enemy_spawn_timer<=0:
-            enemy_type = random.choice([Enemy, fast_enemy, shooter_rastreio])
-            new_enemy = enemy_type()
-            enemies.add(new_enemy)
-            enemy_spawn_timer = enemy_spawn_rate'''
 
         # Checking for collisions between bullets and enemies
         for bullet in bullets:
@@ -452,7 +444,7 @@ def execute_game(player: Player,game_state,score, current_round):
 
         # Check if the player is dead
         if player.health <= 0:
-            game_state.clear_save() #clear save on game over
+           # game_state.clear_save() #clear save on game over
             game_over_screen()
 
 
