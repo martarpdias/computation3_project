@@ -2,6 +2,7 @@ import pygame
 from config import *
 from utils import *
 from utils import under_construction
+from shop import *
 
 
 def map(player):
@@ -16,10 +17,11 @@ def map(player):
     player_group=pygame.sprite.Group()
     player_group.add(player)
 
-    special_area=pygame.Rect(530,30,140,140)
-
+    shop_area = pygame.Rect(400, 250, 200, 100)
 
     running=True
+    in_shop = False
+
     while running:
         clock.tick(fps)
         screen.blit(background,(0,0))
@@ -32,24 +34,20 @@ def map(player):
         #update their position
         player.update()
 
-        #detect if the user walks in the special area(house)
-        if special_area.colliderect(player.rect):
-            under_construction()
-            #change player position to avoid an infinite loop
-            player.rect.top=200
-            player.rect.left=560
+        #Detect the collision with the shop
+        if shop_area.colliderect(player.rect):
+            in_shop = True
+            shop(player)
 
-        #allow a player to return to the previous screen
-        '''if player.rect.left <=0:
-            #position the player to the right of the screen
-            player.rect.left=width-player.rect.width
-            return "main" #we wnat to switch to the main game'''
+        
 
         #draw the player
         player_group.draw(screen)
 
         pygame.display.flip()
 
+        if not in_shop:
+            pass
 
 
 

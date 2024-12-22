@@ -18,12 +18,14 @@ def game_loop():
 
     player = Player()
     current_state = "main"
+    screen = pygame.display.set_mode((resolution))
 
     while True:
         if current_state == "main":
             current_state = execute_game(player)
         elif current_state == "map":
             current_state = map(player)
+        
 
 
 
@@ -43,7 +45,6 @@ def execute_game(player: Player):
     # Player setup
     player_group = pygame.sprite.Group()
     player_group.add(player)
-    score = 0
 
     # Initialize bullets
     bullets = pygame.sprite.Group()
@@ -257,6 +258,8 @@ def execute_game(player: Player):
                     player.switch_guns("shotgun")
                 elif event.key == pygame.K_4:
                     player.switch_guns("RPG")
+                elif event.key == pygame.K_ESCAPE:
+                    pause(screen, width, height)
 
         for enemy in enemies:
             if isinstance(enemy, shooter_rastreio):
@@ -294,13 +297,15 @@ def execute_game(player: Player):
                     bullet.kill()
                     
             else:
-                collided_enemies = pygame.sprite.spritecollide(bullet, enemies, True)            
+                collided_enemies = pygame.sprite.spritecollide(bullet, enemies, False)            
                 for enemy in collided_enemies:
                     enemy.health -= bullet.damage  # Decrease health by bullet damage
+                    print(f"Health after damage: {enemy.health}")
                     bullet.kill()  # Destroy the bullet
                     if enemy.health <= 0:
+                        print(f"{type(enemy)} killed!")
                         enemy.kill()  # Destroy the enemy
-                        score += 100
+                        player.coins += enemy.coin_value # Add coins to the player
 
         # Checking for collisions between bullets and players
         for bullet in enemy_bullets:
@@ -323,19 +328,12 @@ def execute_game(player: Player):
         # Update the enemy spawn timer
         enemy_spawn_timer -= 1
 
-        # Update positions
-        player_group.update()
-        bullets.update()
-        enemies.update(player)
-        enemy_bullets.update()
 
         # Check collisions between player and enemies
         collided_enemies = pygame.sprite.spritecollide(player, enemies, False)
         for enemy in collided_enemies:
-            player.take_damage(enemy.damage)
+            enemy.deal_damage(player)
 
-        # Check if the player's speed boost has expired
-        player.check_speed_boost()
 
         #check if the player's fire rate inrease has expired
         player.check_fire_rate_increase()
@@ -368,13 +366,15 @@ def execute_game(player: Player):
             pygame.draw.rect(screen, (0, 255, 0),
                              (enemy.rect.x, enemy.rect.y - 10, enemy_health_bar_width, 5))  # Enemy health bar
 
-        # Display the score
-        score_text = font.render(f"Score: {score}", True, (255, 255, 255))  # White text
-        screen.blit(score_text, (295, 45))  # Display the score at the top-left corner
+        # Display the coins
+        coins_text = font.render(f"Coins: {player.coins}", True, (255, 255, 255))  # White text
+        screen.blit(coins_text, (295, 45))  # Display the coins at the top-left corner
 
         # Update groups
         player_group.update()
         bullets.update()
+        boss = Boss()
+        boss.update(player, enemies)
         enemies.update(player)
         power_ups.update()
 
@@ -385,9 +385,6 @@ def execute_game(player: Player):
         for bullet in bullets:
             bullet.draw(screen)
 
-        # Display the score
-        score_text = font.render(f"Score: {score}", True, (255, 255, 255))
-        screen.blit(score_text, (295, 45))
 
         # Update the display
         pygame.display.flip()
@@ -471,6 +468,8 @@ def show_transition_screen(screen, current_round, map_callback=None):
 def show_game_over_screen(screen):
     screen.fill((0, 0, 0))
     font = pygame.font.SysFont("segoeuiblack", 50)
+
+    #Display text
     text = font.render("Game Over!", True, (255, 255, 255))
     text_rect = text.get_rect(center=(resolution[0] // 2, resolution[1] // 2))
     screen.blit(text, text_rect)
@@ -478,6 +477,7 @@ def show_game_over_screen(screen):
     # Restart button
     restart_button = pygame.Rect(resolution[0] // 2 - 100, resolution[1] // 2 + 100, 200, 50)
     pygame.draw.rect(screen, (255, 0, 0), restart_button)
+
     font = pygame.font.SysFont("segoeuiblack", 30)
     restart_text = font.render("Restart", True, (255, 255, 255))
     restart_text_rect = restart_text.get_rect(center=restart_button.center)

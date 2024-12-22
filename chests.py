@@ -44,9 +44,7 @@ class Chest(pygame.sprite.Sprite):
         '''
         all_rewards = [
             {"name": "health potion","type": "instant", "value": 20, "probability": 0.5},
-            {"name": "speed potion","type": "instant", "value": 5, "probability": 0.5},
             {"name": "health increase","type": "permanent", "value": 20, "probability": 0.25},
-            {"name": "speed increase","type": "permanent", "value": 5, "probability": 0.25},
             {"name": "fire rate increase","type": "instant", "value": 2, "probability": 0.5},
             {"name": "shotgun","type": "permanent", "value": 1, "probability": 0.1},
             {"name": "rifle","type": "permanent", "value": 1, "probability": 0.1},
@@ -119,10 +117,6 @@ class Chest(pygame.sprite.Sprite):
 
                             if selected_reward["name"] == "health potion":
                                 player.apply_health_potion(selected_reward["value"])
-                            elif selected_reward["name"] == "speed potion":
-                                player.apply_speed_potion()
-                            elif selected_reward["name"] == "shield potion":
-                                player.apply_shield_potion()
                             elif selected_reward["name"] == "health increase":
                                 player.health_increase()
                             elif selected_reward["name"] == "fire rate increase":
@@ -133,6 +127,8 @@ class Chest(pygame.sprite.Sprite):
                                 player.unlock_guns("shotgun")
                             elif selected_reward["name"] == "rifle":
                                 player.unlock_guns("rifle")
+                            elif selected_reward["name"] == "RPG":
+                                player.unlock_guns("RPG")
                             
             
 

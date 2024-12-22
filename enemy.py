@@ -26,6 +26,7 @@ class Enemy(pygame.sprite.Sprite):
         self.damage = 5
         self.damage_cooldown = 2  # Cooldown in seconds
         self.last_damage_time = 0  # Last time damage was dealt
+        self.coin_value = 10
 
     def update(self, player):
         direction = math.atan2(player.rect.y - self.rect.y, player.rect.x - self.rect.x)
@@ -62,8 +63,10 @@ class fast_enemy(Enemy):
         self.speed = random.randint(4, 5)
         #Health
         self.health = 5
+        self.max_health = self.health
         #damage it deals
         self.damage = 3
+        self.coin_value = 10
 
 
 class shooter_rastreio(Enemy):
@@ -73,6 +76,7 @@ class shooter_rastreio(Enemy):
         self.health = 50
         self.max_health = self.health
         self.shoot_cooldown = 0
+        self.coin_value = 20
         
     
     def shoot(self,enemy_bullet, player):
@@ -92,6 +96,48 @@ class shooter_rastreio(Enemy):
     
     def update(self, player):
        pass
+
+class Boss(Enemy):
+    def __init__(self):
+        super().__init__()
+        self.image.fill(yellow)
+        self.health = 100
+        self.max_health = self.health
+        self.shoot_cooldown = 0
+        self.coin_value = 100
+
+        #healing part
+        self.has_healed = False #to check if it happened
+
+        #summoning enemies
+        self.last_summon_time = pygame.time.get_ticks()
+        self.summon_cooldown = 5000 #5 seconds
+        
+    def heal(self):
+        if self.health <= 50 and not self.has_healed:
+            self.health = 75
+            self.has_healed = True
+    
+    def summon_enemies(self, enemies):
+        current_time = pygame.time.get_ticks()
+        if current_time - self.last_summon_time >= self.summon_cooldown:
+            new_enemy = Enemy()
+            enemies.add(new_enemy)
+            self.last_summon_time = current_time
+
+    def update(self, player, enemies):
+        self.heal()
+        self.summon_enemies(enemies)
+        direction = math.atan2(player.rect.y - self.rect.y, player.rect.x - self.rect.x)
+        self.rect.x += int(self.speed * math.cos(direction))
+        self.rect.y += int(self.speed * math.sin(direction))
+
+
+
+        
+
+        
+    
     
         
 
