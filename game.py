@@ -14,6 +14,7 @@ from chests import Chest
 from freeze import Freeze
 from game_over import game_over_screen  
 from game_state import GameState
+from winner import winner_screen
 
 
 
@@ -214,28 +215,30 @@ def execute_game(player: Player,game_state,score, current_round):
         screen.blit(time_text, (25, height - 70))
 
         if elapsed_time >= round_time:
-            #save the game state before showing transition screen
-            game_state.save_game(score,current_round,player.health)
-            # Show transition screen
-            result = show_transition_screen(screen, current_round, lambda: map(player))
-            if result == "next_round":
-                # Proceed to the next round
-                start_time = pygame.time.get_ticks()
-                current_round += 1
+            if current_round == 1 or current_round == 2 or current_round == 3 or current_round == 4 or current_round == 5 or current_round == 6 or current_round == 7 or current_round == 8 or current_round == 9:
+                #save the game state before showing transition screen
                 game_state.save_game(score,current_round,player.health)
-                player.health = min(100, int(player.health + player.health / 3))
-                for enemy in enemies:
-                    enemy.kill()
-                for bullet in bullets:
-                    bullet.kill()
-                for power_up in power_ups:
-                    power_up.kill()
-            elif result == "map":
-                #save before going to the map
-                game_state.save_game(score,current_round,player.health)
-                # Handle map-related logic
-                return "map"
-
+                # Show transition screen
+                result = show_transition_screen(screen, current_round, lambda: map(player))
+                if result == "next_round":
+                    # Proceed to the next round
+                    start_time = pygame.time.get_ticks()
+                    current_round += 1
+                    game_state.save_game(score,current_round,player.health)
+                    player.health = min(100, int(player.health + player.health / 3))
+                    for enemy in enemies:
+                        enemy.kill()
+                    for bullet in bullets:
+                        bullet.kill()
+                    for power_up in power_ups:
+                        power_up.kill()
+                elif result == "map":
+                    #save before going to the map
+                    game_state.save_game(score,current_round,player.health)
+                    # Handle map-related logic
+                    return "map"
+            else:
+                result = winner_screen()
 
 
         # Enemy spawning according to the round
@@ -326,9 +329,17 @@ def execute_game(player: Player,game_state,score, current_round):
                 enemy_spawn_timer = enemy_spawn_rate
 
             elif current_round == 10:
-                enemy_spawn_rate = fps * 2
-                enemies.add(Boss("boss.png"))
+                enemy_spawn_rate = fps * 1.5
+                enemy_type = random.choice([Enemy, fast_enemy, shooter_rastreio])
+                if enemy_type == Enemy:
+                    new_enemy = enemy_type("enemy.png")
+                elif enemy_type == fast_enemy:
+                    new_enemy = enemy_type("fast_enemy.png")
+                elif enemy_type == shooter_rastreio:
+                    new_enemy = enemy_type("shooter_rastreio.png")
+                enemies.add(new_enemy)
                 enemy_spawn_timer = enemy_spawn_rate
+            
                 
         enemy_spawn_timer -= 1
 
@@ -434,8 +445,6 @@ def execute_game(player: Player,game_state,score, current_round):
                 game_state.save_game(score,current_round,player.health)
             player.take_damage(enemy.damage)
 
-        # Check if the player's speed boost has expired
-        #player.check_speed_boost()
 
         #check if the player's fire rate inrease has expired
         player.check_fire_rate_increase()
@@ -476,8 +485,6 @@ def execute_game(player: Player,game_state,score, current_round):
         # Update groups
         player_group.update()
         bullets.update()
-        boss = Boss()
-        boss.update(player, enemies)
         enemies.update(player)
         power_ups.update()
 

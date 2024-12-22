@@ -2,7 +2,7 @@ import pygame
 from config import *
 
 
-def game_over_screen():
+def winner_screen():
     from interface import interface  # Prevent circular import
 
     # Initialize Pygame screen

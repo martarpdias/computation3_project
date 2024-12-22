@@ -6,7 +6,6 @@ from bullet import *
 import time
 from bullet import *
 import time
-from game import *
 from enemy import Enemy
 
 class Player(pygame.sprite.Sprite):
