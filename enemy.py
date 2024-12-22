@@ -11,10 +11,14 @@ enemy_bullet = pygame.sprite.Group()
 
 
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self):
+    def __init__(self,image_path="enemy.png"):
         super().__init__()
-        self.image = pygame.Surface((enemy_size, enemy_size))
-        self.image.fill(red)
+        #self.image = pygame.Surface((enemy_size, enemy_size))
+        #self.image.fill(red)
+        #self.rect = self.image.get_rect()
+
+        self.image = pygame.image.load("enemy.png").convert_alpha()
+        self.image = pygame.transform.scale(self.image, (enemy_size, enemy_size))
         self.rect = self.image.get_rect()
 
         self.rect.x = random.randint(0, width - enemy_size)
@@ -48,15 +52,15 @@ class Enemy(pygame.sprite.Sprite):
             self.last_damage_time = time.time()
 
 
-class fast_enemy(Enemy):
-    def __init__(self):
-        """
-        Initialize the enemy instance
-        """
-        super().__init__()
-        #change the appearence
-        self.image.fill(blue)
 
+class fast_enemy(Enemy):
+    def __init__(self, image_path="fast_enemy.png"):
+        super().__init__(image_path)
+        self.image = pygame.image.load(image_path).convert_alpha()
+
+        fast_enemy_size = 50
+        self.image = pygame.transform.scale(self.image, (fast_enemy_size, fast_enemy_size))
+        self.rect = self.image.get_rect()
 
         #Random speed
         self.speed = random.randint(4, 5)
@@ -67,9 +71,15 @@ class fast_enemy(Enemy):
 
 
 class shooter_rastreio(Enemy):
-    def __init__(self):
-        super().__init__()
-        self.image.fill(pink)
+    def __init__(self,image_path="shooter_rastreio.png"):
+        super().__init__(image_path)
+        self.image = pygame.image.load(image_path).convert_alpha()
+        #self.image.fill(pink)
+
+        fast_enemy_size = 50
+        self.image = pygame.transform.scale(self.image, (fast_enemy_size, fast_enemy_size))
+        self.rect = self.image.get_rect()
+
         self.health = 50
         self.max_health = self.health
         self.shoot_cooldown = 0
@@ -91,10 +101,4 @@ class shooter_rastreio(Enemy):
             
     
     def update(self, player):
-       pass
-    
-        
-
-
-
-
+        pass

@@ -11,7 +11,8 @@ class Player(pygame.sprite.Sprite):
         """
         Initialize the player instance
         """
-        #super().__init__()
+
+        #super()._init_()
         #self.image = pygame.Surface(player_size)
         #self.image.fill(blue)
         #self.rect=self.image.get_rect()
@@ -206,7 +207,6 @@ class Player(pygame.sprite.Sprite):
         '''
         if gun in self.guns:
             self.guns[gun]["unlocked"] = True
-    
 
     
         

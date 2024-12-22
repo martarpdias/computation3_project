@@ -1,9 +1,10 @@
-from utils import *
+import pygame
 from config import *
 import math
 
+
 class Bullet(pygame.sprite.Sprite):
-    def __init__(self, x:int, y:int, direction:float):
+    def __init__(self,x:int ,y:int , direction:float):
         """
         Initialize the bullet instance:
         Args
@@ -16,14 +17,16 @@ class Bullet(pygame.sprite.Sprite):
 
         direction:float
             Direction in which it is fired, in radians.
+
         """
-        super().__init__()  # Corrected to __init__ to call the Sprite constructor
+
+        super().__init__()
         self.radius = bullet_size
-        self.color = dark_red
+        self.color = yellow
         self.rect = pygame.Rect(x - self.radius,
                                 y - self.radius,
-                                self.radius * 2,
-                                self.radius * 2)
+                                self.radius*2,
+                                self.radius*2)
 
         self.speed = 7
         self.direction = direction
@@ -33,15 +36,15 @@ class Bullet(pygame.sprite.Sprite):
         """
         Update the bullet's position and check if it ages offscreen.
         """
-        # Coordinate update
+        #Coordinate update
         self.rect.x += int(self.speed * math.cos(self.direction))
         self.rect.y += int(self.speed * math.sin(self.direction))
 
-        # Check if out of bounds
-        if self.rect.x < 0 or self.rect.x > width or self.rect.y < 0 or self.rect.y > height:
+        #Check if out of bounds
+        if self.rect.x<0 or self.rect.x>width or self.rect.y<0 or self.rect.y>height:
             self.kill()
 
-    def draw(self, screen: pygame.Surface):
+    def draw(self, screen:pygame.Surface):
         """
         Draw the bullet on the screen.
 
@@ -94,7 +97,7 @@ class LargeBullet(Bullet):
 
         """
         super().__init__(x, y, direction)
-        self.radius = bullet_size*1.25 #bigger than the size of the normal one
+        self.radius = bullet_size * 1.25 #bigger than the size of the normal one
         self.color = blue
         self.speed = 5
         self.damage = 20

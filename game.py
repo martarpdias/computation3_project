@@ -3,14 +3,47 @@ import math
 import pygame
 import random
 
-from map import map
+from map import *
 from enemy import *
 from player import Player
-from bullet import Bullet
+from bullet import Bullet, RPG_rocket, FastBullet, LargeBullet
 from invicibility import Invincibility
 from deSpawner import DeSpawner
 from velocity import Velocity
 from chests import Chest
+from levels import LEVELS
+
+
+def game_loop():
+    player = Player()
+    screen = pygame.display.set_mode((width, height))
+    current_state = "map"
+    current_level = None  # Track the selected level
+
+    while True:
+        if current_state == "map":
+            # Map function handles navigation and level selection
+            current_level = map(player)  # Returns a level number if selected
+            if current_level:  # If a level is selected
+                current_state = "level"
+        
+        elif current_state == "level":
+            if current_level:
+                # Play the level by executing the game
+                completed = execute_game(player)  # Pass the player instance
+                if completed and current_level + 1 in LEVELS:
+                    LEVELS[current_level + 1]["unlock"] = True  # Unlock the next level
+                current_state = "map"  # Return to the map after playing the level
+                current_level = None
+
+        elif current_state == "game_over":
+            result = show_game_over_screen(screen)
+            if result == "restart":
+                # Reset the game state
+                player = Player()  # Reset player
+                current_state = "map"  # Restart from the map
+                current_level = None
+
 
 
 
@@ -24,6 +57,7 @@ def game_loop():
             current_state = execute_game(player)
         elif current_state == "map":
             current_state = map(player)
+
 
 
 
@@ -66,7 +100,7 @@ def execute_game(player: Player):
     current_round = 1
     final_round = 10
     round_time = 20  # seconds per round
-    start_time = pygame.time.get_ticks()  # Get initial time for the round    
+    start_time = pygame.time.get_ticks()  # Get initial time for the round
 
     # Initialize lists for active power-ups
     active_power_ups = []
@@ -96,17 +130,10 @@ def execute_game(player: Player):
                     selected_bullet_type = 2  # Fast bullet
                 elif event.key == pygame.K_3:
                     selected_bullet_type = 3  # Large bullet
+                elif event.key == pygame.K_4:
+                    selected_bullet_type = 4
 
-        # automatic shooting
-        if shooting_timer <= 0:  # Shoot every few frames
-            directions = [math.radians(0), math.radians(90), math.radians(180), math.radians(270)]
-
-            for direction in directions:
-                bullet = shoot_bullet(player.rect.centerx, player.rect.centery, direction, selected_bullet_type)
-                bullets.add(bullet)
-
-            shooting_timer = fps // 2  # Adjust shooting rate
-
+        
         shooting_timer -= 0.5  # Decrement the shooting timer
         # Update and draw bullets
         bullets.update()
@@ -120,7 +147,7 @@ def execute_game(player: Player):
         # Update player
         player_group.update()
 
-        
+
         # Handle power-ups
         # Spawn power-ups
         if not active_power_ups:  # Check if there are no active power
@@ -133,7 +160,7 @@ def execute_game(player: Player):
             power_up_spawn_timer -= 1
 
         # Check for collisions between the player and power-ups
-        collided_power_ups = pygame.sprite.spritecollide(player, power_ups, True)  # `True` removes collided power-ups
+        collided_power_ups = pygame.sprite.spritecollide(player, power_ups, True)  # True removes collided power-ups
         for power_up in collided_power_ups:
             power_up.affect_player(player)  # Apply power-up effect to the player
             power_up.affect_game(locals())  # Apply power-up effect to the game
@@ -198,37 +225,6 @@ def execute_game(player: Player):
                 return "map"
 
 
-        
-        # Enemy spawning according to the round
-        if enemy_spawn_timer<=0:
-            if current_round == 1:
-                enemy_spawn_rate = fps * 2
-                enemies.add(Enemy())
-                enemy_spawn_timer = enemy_spawn_rate
-            elif current_round == 2:
-                enemy_spawn_rate = fps * 1.5
-                enemies.add(Enemy())
-                enemy_spawn_timer = enemy_spawn_rate
-            elif current_round == 3:
-                enemy_spawn_rate = fps * 2
-                enemy_type = random.choice([Enemy, fast_enemy])
-                new_enemy = enemy_type()
-                enemies.add(new_enemy)
-                enemy_spawn_timer = enemy_spawn_rate
-            elif current_round == 4:
-                enemy_spawn_rate = fps * 1.5
-                enemy_type = random.choice([Enemy, fast_enemy])
-                new_enemy = enemy_type()
-                enemies.add(new_enemy)
-                enemy_spawn_timer = enemy_spawn_rate
-            elif current_round == 5:
-                enemy_spawn_rate = fps * 2
-                enemy_type = random.choice([Enemy, fast_enemy, shooter_rastreio])
-                new_enemy = enemy_type()
-                enemies.add(new_enemy)
-                enemy_spawn_timer = enemy_spawn_rate
-        enemy_spawn_timer -= 1
-
 
         # Display round number
         round_text = font.render(f"Round: {current_round}", True, (255, 255, 255))
@@ -262,11 +258,11 @@ def execute_game(player: Player):
             if isinstance(enemy, shooter_rastreio):
                 enemy.shoot(enemy_bullets, player)
                 pass
-        
+
         #shooting
         player.shoot(bullets)
 
-        
+
 
         #Spawning the chests
         current_time = pygame.time.get_ticks()
@@ -278,12 +274,6 @@ def execute_game(player: Player):
                 last_chest_spwan_time = current_time
 
 
-        #spawning the enemies
-        if enemy_spawn_timer<=0:
-            enemy_type = random.choice([Enemy, fast_enemy, shooter_rastreio])
-            new_enemy = enemy_type()
-            enemies.add(new_enemy)
-            enemy_spawn_timer = enemy_spawn_rate
 
         # Checking for collisions between bullets and enemies
         for bullet in bullets:
@@ -292,9 +282,9 @@ def execute_game(player: Player):
                 if collided_enemies:
                     bullet.explosion(enemies)
                     bullet.kill()
-                    
+
             else:
-                collided_enemies = pygame.sprite.spritecollide(bullet, enemies, True)            
+                collided_enemies = pygame.sprite.spritecollide(bullet, enemies, True)
                 for enemy in collided_enemies:
                     enemy.health -= bullet.damage  # Decrease health by bullet damage
                     bullet.kill()  # Destroy the bullet
@@ -317,7 +307,7 @@ def execute_game(player: Player):
                 rewards = chest.open()
                 if rewards:
                     selected_reward = chest.display_rewards_options(screen, rewards, player, enemies)
-                   
+
         chests.draw(screen)
 
         # Update the enemy spawn timer
@@ -345,11 +335,6 @@ def execute_game(player: Player):
         # Check if the player is dead
         if player.health <= 0:
             show_game_over_screen(screen)
-    
-        # Checking if the user goes into the shed area
-        '''if player.rect.right >= width:
-            # Change the game state to shed
-            return "shed"'''
 
         # Draw game objects
         player_group.draw(screen)
@@ -410,8 +395,7 @@ def pause(screen, width, height):
                 pygame.quit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    paused = False        
-        
+                    paused = False
 
 
 def show_transition_screen(screen, current_round, map_callback=None):
@@ -466,8 +450,6 @@ def show_transition_screen(screen, current_round, map_callback=None):
 
 
 
-
-
 def show_game_over_screen(screen):
     screen.fill((0, 0, 0))
     font = pygame.font.SysFont("segoeuiblack", 50)
@@ -493,5 +475,6 @@ def show_game_over_screen(screen):
                 exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if restart_button.collidepoint(event.pos):
-                    return "restart" #is not working yet
+                    return "restart"  # Signal to restart the game
+
 
