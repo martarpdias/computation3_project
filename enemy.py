@@ -105,9 +105,15 @@ class shooter_rastreio(Enemy):
        pass
 
 class Boss(Enemy):
-    def __init__(self):
-        super().__init__()
-        self.image.fill(yellow)
+    def __init__(self, image_path="boss.png"):
+        super().__init__(image_path)
+        self.image = pygame.image.load(image_path).convert_alpha()
+
+
+        fast_enemy_size = 50
+        self.image = pygame.transform.scale(self.image, (fast_enemy_size, fast_enemy_size))
+        self.rect = self.image.get_rect()
+
         self.health = 100
         self.max_health = self.health
         self.shoot_cooldown = 0
@@ -132,12 +138,14 @@ class Boss(Enemy):
             enemies.add(new_enemy)
             self.last_summon_time = current_time
 
-    def update(self, player, enemies):
-        self.heal()
-        self.summon_enemies(enemies)
-        direction = math.atan2(player.rect.y - self.rect.y, player.rect.x - self.rect.x)
-        self.rect.x += int(self.speed * math.cos(direction))
-        self.rect.y += int(self.speed * math.sin(direction))
+    def update(self, player=None, enemies=None):
+        if player and enemies:
+            self.heal()
+            self.summon_enemies(enemies)
+            direction = math.atan2(player.rect.y - self.rect.y, player.rect.x - self.rect.x)
+            self.rect.x += int(self.speed * math.cos(direction))
+            self.rect.y += int(self.speed * math.sin(direction))
+
 
 
 

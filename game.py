@@ -12,7 +12,7 @@ from deSpawner import DeSpawner
 from velocity import Velocity
 from chests import Chest
 from freeze import Freeze
-
+from game_over import game_over_screen  
 from game_state import GameState
 
 
@@ -240,16 +240,19 @@ def execute_game(player: Player,game_state,score, current_round):
 
         # Enemy spawning according to the round
         if enemy_spawn_timer<=0:
+
             if current_round == 1:
-                enemy_spawn_rate = fps * 20
+                enemy_spawn_rate = fps * 3
                 enemies.add(Enemy("enemy.png"))
                 enemy_spawn_timer = enemy_spawn_rate
+
             elif current_round == 2:
-                enemy_spawn_rate = fps * 15
+                enemy_spawn_rate = fps * 2.5
                 enemies.add(Enemy("enemy.png"))
                 enemy_spawn_timer = enemy_spawn_rate
+
             elif current_round == 3:
-                enemy_spawn_rate = fps *15
+                enemy_spawn_rate = fps * 2
                 enemy_type = random.choice([Enemy, fast_enemy])
                 if enemy_type == Enemy:
                     new_enemy = enemy_type("enemy.png")
@@ -257,7 +260,18 @@ def execute_game(player: Player,game_state,score, current_round):
                     new_enemy = enemy_type("fast_enemy.png")
                 enemies.add(new_enemy)
                 enemy_spawn_timer = enemy_spawn_rate
+
             elif current_round == 4:
+                enemy_spawn_rate = fps * 3
+                enemy_type = random.choice([Enemy, fast_enemy])
+                if enemy_type == Enemy:
+                    new_enemy = enemy_type("enemy.png")
+                else:
+                    new_enemy = enemy_type("fast_enemy.png")
+                enemies.add(new_enemy)
+                enemy_spawn_timer = enemy_spawn_rate
+
+            elif current_round == 5:
                 enemy_spawn_rate = fps * 2.5
                 enemy_type = random.choice([Enemy, fast_enemy])
                 if enemy_type == Enemy:
@@ -266,30 +280,39 @@ def execute_game(player: Player,game_state,score, current_round):
                     new_enemy = enemy_type("fast_enemy.png")
                 enemies.add(new_enemy)
                 enemy_spawn_timer = enemy_spawn_rate
-            elif current_round == 5:
-                enemy_spawn_rate = fps * 2
-                enemy_type = random.choice([Enemy, fast_enemy])
-                new_enemy = enemy_type()
-                enemies.add(new_enemy)
-                enemy_spawn_timer = enemy_spawn_rate
+
             elif current_round == 6:
                 enemy_spawn_rate = fps * 2.5
                 enemy_type = random.choice([Enemy, shooter_rastreio])
-                new_enemy = enemy_type()
+                if enemy_type == Enemy:
+                    new_enemy = enemy_type("enemy.png")
+                elif enemy_type == shooter_rastreio:
+                    new_enemy = enemy_type("shooter_rastreio.png")
                 enemies.add(new_enemy)
                 enemy_spawn_timer = enemy_spawn_rate
+
             elif current_round == 7:
                 enemy_spawn_rate = fps * 2
                 enemy_type = random.choice([Enemy, shooter_rastreio])
-                new_enemy = enemy_type()
+                if enemy_type == Enemy:
+                    new_enemy = enemy_type("enemy.png")
+                elif enemy_type == shooter_rastreio:
+                    new_enemy = enemy_type("shooter_rastreio.png")
                 enemies.add(new_enemy)
                 enemy_spawn_timer = enemy_spawn_rate
+
             elif current_round == 8:
                 enemy_spawn_rate = fps * 2.5
                 enemy_type = random.choice([Enemy, fast_enemy, shooter_rastreio])
-                new_enemy = enemy_type()
+                if enemy_type == Enemy:
+                    new_enemy = enemy_type("enemy.png")
+                elif enemy_type == fast_enemy:
+                    new_enemy = enemy_type("fast_enemy.png")
+                elif enemy_type == shooter_rastreio:
+                    new_enemy = enemy_type("shooter_rastreio.png")
                 enemies.add(new_enemy)
                 enemy_spawn_timer = enemy_spawn_rate
+
             elif current_round == 9:
                 enemy_spawn_rate = fps * 2
                 enemy_type = random.choice([Enemy, fast_enemy, shooter_rastreio])
@@ -301,10 +324,10 @@ def execute_game(player: Player,game_state,score, current_round):
                     new_enemy = enemy_type("shooter_rastreio.png")
                 enemies.add(new_enemy)
                 enemy_spawn_timer = enemy_spawn_rate
+
             else:
                 enemy_spawn_rate = fps * 2
-                nemy_spawn_rate = fps * 3
-                enemies.add(Boss(Enemy))
+                enemies.add(Boss("boss.png"))
                 enemy_spawn_timer = enemy_spawn_rate
                 
         enemy_spawn_timer -= 1
@@ -361,18 +384,18 @@ def execute_game(player: Player,game_state,score, current_round):
 
 
         #spawning the enemies
-        if enemy_spawn_timer<=0:
+        '''if enemy_spawn_timer<=0:
             enemy_type = random.choice([Enemy, fast_enemy, shooter_rastreio])
             new_enemy = enemy_type()
             enemies.add(new_enemy)
-            enemy_spawn_timer = enemy_spawn_rate
+            enemy_spawn_timer = enemy_spawn_rate'''
 
         # Checking for collisions between bullets and enemies
         for bullet in bullets:
             if isinstance(bullet, RPG_rocket):
                 collided_enemies = pygame.sprite.spritecollide(bullet, enemies, False)
                 if collided_enemies:
-                    bullet.explosion(enemies)
+                    bullet.explosion(enemies, player)
                     bullet.kill()
                     
             else:
@@ -420,7 +443,7 @@ def execute_game(player: Player,game_state,score, current_round):
             player.take_damage(enemy.damage)
 
         # Check if the player's speed boost has expired
-        player.check_speed_boost()
+        #player.check_speed_boost()
 
         #check if the player's fire rate inrease has expired
         player.check_fire_rate_increase()
@@ -428,16 +451,10 @@ def execute_game(player: Player,game_state,score, current_round):
         player_group.update()
 
         # Check if the player is dead
-        #if player.health <= 0:
-            #game_state.clear_save() #clear save on game over
-            #show_game_over_screen(screen)
+        if player.health <= 0:
+            game_state.clear_save() #clear save on game over
+            game_over_screen()
 
-
-
-        # Checking if the user goes into the shed area
-        '''if player.rect.right >= width:
-            # Change the game state to shed
-            return "shed"'''
 
         # Draw game objects
         player_group.draw(screen)
