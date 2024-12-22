@@ -1,6 +1,7 @@
 from utils import *  # utils contains helper functions (imported pygame)
 from game import *  # main game logic import
 from game_story import story
+from game1 import *
 
 
 
@@ -554,4 +555,4 @@ def options_():
 
 
 def start_game():
-    game_loop()
+    game_loop1()

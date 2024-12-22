@@ -1,8 +1,7 @@
 import pygame
 from config import *
 from utils import *
-from utils import under_construction
-from game_helpers import *
+
 
 
 def map(player):

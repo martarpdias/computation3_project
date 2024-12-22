@@ -11,14 +11,16 @@ enemy_bullet = pygame.sprite.Group()
 
 
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self):
+    def __init__(self, x, y):
         super().__init__()
-        self.image = pygame.Surface((enemy_size, enemy_size))
+        self.image = pygame.Surface((40, 40))
         self.image.fill(red)
         self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
 
-        self.rect.x = random.randint(0, width - enemy_size)
-        self.rect.y = random.randint(0, height - enemy_size)
+        self.rect.x = random.randint(0, width - 40)
+        self.rect.y = random.randint(0, height - 40)
 
         self.speed = random.randint(2, 3)
         self.health = 10
