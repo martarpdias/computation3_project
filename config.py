@@ -1,3 +1,6 @@
+from enemy import Enemy, fast_enemy, shooter_rastreio
+
+
 # Config file used to set global variables and other settings
 
 # COLORS
@@ -24,3 +27,47 @@ fps=60
 player_size=(50,100)
 enemy_size=40
 bullet_size=10
+
+
+LEVELS = {
+    1: {
+        "enemy_types": [Enemy],
+        "spawn_rate": fps * 2,  # Enemies spawn every 2 seconds,
+    },
+    2: {
+        "enemy_types": [Enemy],
+        "spawn_rate": fps *1.5,  # Faster spawning
+    },
+    3: {
+        "enemy_types": [Enemy, fast_enemy],
+        "spawn_rate": fps * 2,
+    },
+    4: {
+        "enemy_types": [Enemy, fast_enemy],
+        "spawn_rate": fps * 1.5,
+    },
+    5: {
+        "enemy_types": [Enemy, fast_enemy],
+        "spawn_rate": fps * 1,
+    },
+    6: {
+        "enemy_types": [Enemy,shooter_rastreio],
+        "spawn_rate": fps * 2,
+    },
+    7: {
+        "enemy_types": [Enemy, shooter_rastreio],
+        "spawn_rate": fps * 1.5,
+},
+    8: {
+        "enemy_types": [Enemy, fast_enemy, shooter_rastreio],
+        "spawn_rate": fps * 2,
+    },
+    9: {
+        "enemy_types": [Enemy, fast_enemy, shooter_rastreio],
+        "spawn_rate": fps * 1.5,
+    },
+    10: {
+        "enemy_types": [Enemy, fast_enemy],
+        "spawn_rate": fps * 2,
+},
+}
