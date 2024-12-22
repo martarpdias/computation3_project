@@ -1,7 +1,7 @@
-from utils import *  # utils contains helper functions (imported pygame)
-from game import *  # main game logic import
+from utils import *  
 from game_story import story
-
+from game import game_loop
+from config import *  
 
 
 
@@ -550,8 +550,6 @@ def options_():
 
         # Update the display
         pygame.display.update()
-
-
 
 def start_game():
     game_loop()

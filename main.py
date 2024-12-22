@@ -2,7 +2,7 @@ from interface import *
 from game_story import *
 
 def main():
-    story()
+    #story()
 
     interface()
 

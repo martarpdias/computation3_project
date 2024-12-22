@@ -11,6 +11,7 @@ from invicibility import Invincibility
 from deSpawner import DeSpawner
 from velocity import Velocity
 from chests import Chest
+from game_over import game_over_screen
 
 
 
@@ -203,31 +204,61 @@ def execute_game(player: Player):
         # Enemy spawning according to the round
         if enemy_spawn_timer<=0:
             if current_round == 1:
-                enemy_spawn_rate = fps * 2
+                enemy_spawn_rate = fps * 3
                 enemies.add(Enemy())
                 enemy_spawn_timer = enemy_spawn_rate
             elif current_round == 2:
-                enemy_spawn_rate = fps * 1.5
+                enemy_spawn_rate = fps * 2.5
                 enemies.add(Enemy())
                 enemy_spawn_timer = enemy_spawn_rate
             elif current_round == 3:
-                enemy_spawn_rate = fps * 2
+                enemy_spawn_rate = fps * 3
                 enemy_type = random.choice([Enemy, fast_enemy])
                 new_enemy = enemy_type()
                 enemies.add(new_enemy)
                 enemy_spawn_timer = enemy_spawn_rate
             elif current_round == 4:
-                enemy_spawn_rate = fps * 1.5
+                enemy_spawn_rate = fps * 2.5
                 enemy_type = random.choice([Enemy, fast_enemy])
                 new_enemy = enemy_type()
                 enemies.add(new_enemy)
                 enemy_spawn_timer = enemy_spawn_rate
             elif current_round == 5:
                 enemy_spawn_rate = fps * 2
+                enemy_type = random.choice([Enemy, fast_enemy])
+                new_enemy = enemy_type()
+                enemies.add(new_enemy)
+                enemy_spawn_timer = enemy_spawn_rate
+            elif current_round == 6:
+                enemy_spawn_rate = fps * 2.5
+                enemy_type = random.choice([Enemy, shooter_rastreio])
+                new_enemy = enemy_type()
+                enemies.add(new_enemy)
+                enemy_spawn_timer = enemy_spawn_rate
+            elif current_round == 7:
+                enemy_spawn_rate = fps * 2
+                enemy_type = random.choice([Enemy, shooter_rastreio])
+                new_enemy = enemy_type()
+                enemies.add(new_enemy)
+                enemy_spawn_timer = enemy_spawn_rate
+            elif current_round == 8:
+                enemy_spawn_rate = fps * 2.5
                 enemy_type = random.choice([Enemy, fast_enemy, shooter_rastreio])
                 new_enemy = enemy_type()
                 enemies.add(new_enemy)
                 enemy_spawn_timer = enemy_spawn_rate
+            elif current_round == 9:
+                enemy_spawn_rate = fps * 2
+                enemy_type = random.choice([Enemy, fast_enemy, shooter_rastreio])
+                new_enemy = enemy_type()
+                enemies.add(new_enemy)
+                enemy_spawn_timer = enemy_spawn_rate
+            else:
+                enemy_spawn_rate = fps * 2
+                nemy_spawn_rate = fps * 3
+                enemies.add(Boss(Enemy))
+                enemy_spawn_timer = enemy_spawn_rate
+                
         enemy_spawn_timer -= 1
 
 
@@ -342,7 +373,7 @@ def execute_game(player: Player):
 
         # Check if the player is dead
         if player.health <= 0:
-            show_game_over_screen(screen)
+            game_over_screen()
     
         # Checking if the user goes into the shed area
         '''if player.rect.right >= width:
@@ -392,7 +423,7 @@ def execute_game(player: Player):
 #pause game function
 def pause(screen, width, height):
     screen = pygame.display.set_mode((resolution))
-    font = pygame.font.SysFont("segoeuiblack", 100)
+    font = pygame.font.SysFont("stencil", 100)
     text = font.render("Paused", True, (255, 255, 255))
     text_rect = text.get_rect(center=(width // 2, height // 2))
     # Display the text at the center
@@ -417,7 +448,7 @@ def show_transition_screen(screen, current_round, map_callback=None):
     screen.blit(overlay, (0, 0))
 
     # Title
-    font = pygame.font.SysFont("segoeuiblack", 50)
+    font = pygame.font.SysFont("stencil", 50)
     title_text = font.render(f"End of Round {current_round}", True, (255, 255, 255))
     title_rect = title_text.get_rect(center=(width // 2, height // 3))
     screen.blit(title_text, title_rect)
@@ -435,7 +466,7 @@ def show_transition_screen(screen, current_round, map_callback=None):
     )
 
     # Render Buttons
-    button_font = pygame.font.SysFont("segoeuiblack", 30)
+    button_font = pygame.font.SysFont("stencil", 30)
     next_text = button_font.render("Next Round", True, (255, 255, 255))
     next_text_rect = next_text.get_rect(center=next_button_rect.center)
     map_text = button_font.render("Map", True, (255, 255, 255))
@@ -460,38 +491,9 @@ def show_transition_screen(screen, current_round, map_callback=None):
                     if map_callback:  # Call the map callback if provided
                         map_callback()
                     return "map"
+                
 
 
 
 
-
-def show_game_over_screen(screen):
-    screen.fill((0, 0, 0))
-    font = pygame.font.SysFont("segoeuiblack", 50)
-
-    #Display text
-    text = font.render("Game Over!", True, (255, 255, 255))
-    text_rect = text.get_rect(center=(resolution[0] // 2, resolution[1] // 2))
-    screen.blit(text, text_rect)
-    
-    # Restart button
-    restart_button = pygame.Rect(resolution[0] // 2 - 100, resolution[1] // 2 + 100, 200, 50)
-    pygame.draw.rect(screen, (255, 0, 0), restart_button)
-
-    font = pygame.font.SysFont("segoeuiblack", 30)
-    restart_text = font.render("Restart", True, (255, 255, 255))
-    restart_text_rect = restart_text.get_rect(center=restart_button.center)
-    screen.blit(restart_text, restart_text_rect)
-
-    pygame.display.update()
-
-    # Wait for interaction
-    while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                exit()
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if restart_button.collidepoint(event.pos):
-                    return "restart" #is not working yet
 
