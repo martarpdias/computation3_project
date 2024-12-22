@@ -4,18 +4,18 @@ import math
 import time
 from bullet import *
 import time
+from bullet import *
+import time
+from game import *
 from enemy import Enemy
 
 class Player(pygame.sprite.Sprite):
+
+
     def __init__(self):
         """
         Initialize the player instance
         """
-        #super().__init__()
-        #self.image = pygame.Surface(player_size)
-        #self.image.fill(blue)
-        #self.rect=self.image.get_rect()
-        #self.rect.center=(width//2,height//2)
 
         super().__init__()
         # Upload the image of the player
@@ -39,9 +39,15 @@ class Player(pygame.sprite.Sprite):
         self.max_health = 100
         self.health = self.max_health
         self.bullet_cooldown = 0
+        self.normal_speed = 5
+        self.speed = self.normal_speed
+        self.max_health = 100
+        self.health = self.max_health
+        self.bullet_cooldown = 0
         self.invincible = False  # To handle invincibility
         self.active_power_up = None  # Currently active power-up
         self.invincibility_cooldown = 1 #invincibility of 1 second
+        self.invincibility_time = None
         self.invincibility_time = None
         self.last_hit_time = time.time() # Time of the last hit
         self.boost_start_time = None  # Time when the boost started to track the duration
@@ -100,7 +106,16 @@ class Player(pygame.sprite.Sprite):
             fire_rate = self.rifle_fire_rate
         elif self.current_gun == "RPG":
             fire_rate = self.RPG_fire_rate
+        if self.current_gun == "shotgun":
+            fire_rate = self.shotgun_fire_rate
+        elif self.current_gun == "pistol":
+            fire_rate = self.pistol_fire_rate
+        elif self.current_gun == "rifle":
+            fire_rate = self.rifle_fire_rate
+        elif self.current_gun == "RPG":
+            fire_rate = self.RPG_fire_rate
         if self.bullet_cooldown<=0:
+            bullet_type = self.guns[self.current_gun]["bullet_type"]
             bullet_type = self.guns[self.current_gun]["bullet_type"]
             for angle in [0, math.pi / 2, math.pi, 3 * math.pi / 2]:
                 if bullet_type == 1:
@@ -111,7 +126,16 @@ class Player(pygame.sprite.Sprite):
                     bullet = LargeBullet(self.rect.center[0], self.rect.center[1], angle)
                 elif bullet_type == 4:
                     bullet = RPG_rocket(self.rect.center[0], self.rect.center[1], angle)
+                if bullet_type == 1:
+                    bullet = Bullet(self.rect.center[0], self.rect.center[1], angle)
+                elif bullet_type == 2:
+                    bullet = FastBullet(self.rect.center[0], self.rect.center[1], angle)
+                elif bullet_type == 3:
+                    bullet = LargeBullet(self.rect.center[0], self.rect.center[1], angle)
+                elif bullet_type == 4:
+                    bullet = RPG_rocket(self.rect.center[0], self.rect.center[1], angle)
                 bullets.add(bullet)
+            self.bullet_cooldown = fire_rate
             self.bullet_cooldown = fire_rate
         self.bullet_cooldown -=1
 

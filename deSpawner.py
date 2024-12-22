@@ -4,11 +4,15 @@ from powerUps import PowerUp
 from config import *
 
 class DeSpawner(PowerUp):
-    def __init__(self, x, y):
-        super().__init__(x, y, (255, 165, 0))  # Orange
+
+
+    def __init__(self, x, y, image_path="deSpawner.png"):
+        super().__init__(x, y, image_path)
 
     def affect_player(self, player):
-        player.image.fill((255, 165, 0))  # Change player color to orange
+        player.image = pygame.image.load("player_deSpawner.png").convert_alpha()
+        player_width, player_height = 110, 93
+        player.image = pygame.transform.scale(player.image, (player_width, player_height))
 
     def affect_game(self, game):
         # Reduce enemy spawn rate temporarily
@@ -28,4 +32,6 @@ class DeSpawner(PowerUp):
     def remove_effects(self, player, game_context):
         """Reset the spawn rate to normal."""
         game_context["enemy_spawn_rate"] = fps * 2
-        player.image.fill(blue)
+        player.image = pygame.image.load("player_picture.png").convert_alpha()
+        player_width, player_height = 75, 75
+        player.image = pygame.transform.scale(player.image, (player_width, player_height))

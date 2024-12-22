@@ -3,13 +3,14 @@ import random
 from abc import ABC, abstractmethod
 
 class PowerUp(pygame.sprite.Sprite, ABC):
-    def __init__(self, x, y, color):
+    def __init__(self, x, y, image_path):
         super().__init__()
-        self.color = color
-        self.radius = 15  # Radius of the glowing circle
-        self.image = pygame.Surface((self.radius * 4, self.radius * 4), pygame.SRCALPHA)  # Semi-transparent surface
-        self.rect = self.image.get_rect(center=(x, y))
-        self.create_glow()
+
+        # Carrega a imagem do PowerUp
+        self.image = pygame.image.load(image_path)  # Carrega a imagem do arquivo
+        image_width, image_height = 60, 60  # Tamanho da imagem
+        self.image = pygame.transform.scale(self.image, (image_width, image_height))  # Redimensiona a imagem
+        self.rect = self.image.get_rect(center=(x, y))  # Define a posição inicial (centro da imagem)
 
         self.duration_before_use = 10  # Duration the power-up is visible (10 seconds)
         self.duration_use = 7  # Duration after collision (7 seconds)
@@ -32,6 +33,10 @@ class PowerUp(pygame.sprite.Sprite, ABC):
             (center, center),
             self.radius,  # Inner solid circle
         )
+        self.duration_before_use = 10  # Duração visível (10 segundos)
+        self.duration_use = 7  # Duração após a colisão (7 segundos)
+        self.start_time_before_use = pygame.time.get_ticks()  # Início do tempo de visibilidade
+        self.start_time_use = None  # Início do tempo de uso (após colisão)
 
     @abstractmethod
     def affect_player(self, player):
@@ -47,12 +52,12 @@ class PowerUp(pygame.sprite.Sprite, ABC):
         """Remove the power-up's effects (default: do nothing)."""
         pass
 
-    def update(self):
+    #def update(self):
         """Add a pulsing glow animation."""
-        pulse = (pygame.time.get_ticks() // 100) % 20  # Create a pulsing effect
-        self.radius = 15 + pulse // 5  # Adjust the radius slightly
-        self.image.fill((0, 0, 0, 0))  # Clear the previous surface
-        self.create_glow()  # Redraw the glow with the new radius
+     #   pulse = (pygame.time.get_ticks() // 100) % 20  # Create a pulsing effect
+      #  self.radius = 15 + pulse // 5  # Adjust the radius slightly
+       # self.image.fill((0, 0, 0, 0))  # Clear the previous surface
+        #self.create_glow()  # Redraw the glow with the new radius
 
     def is_expired(self):
         """Check if the power-up duration before collision has expired (10 seconds)."""

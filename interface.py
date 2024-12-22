@@ -9,6 +9,7 @@ def interface():
     # initiating pygame
     pygame.init()
     pygame.font.init()
+    pygame.font.init()
     # creating the screen at the set resolution
     screen = pygame.display.set_mode(resolution)
 
@@ -51,6 +52,7 @@ def interface():
 
     # Main game loop
     while True:
+        mouse = pygame.mouse.get_pos()
         mouse = pygame.mouse.get_pos()
         # Event handling
         for ev in pygame.event.get():
@@ -384,7 +386,7 @@ def rules_():
                 #picture of the number_keys
                 number_keys = pygame.image.load("123_keys.png")
                 # Resize 123 keys
-                number_keys_size = (270, 90)
+                number_keys_size = (320, 80)
                 number_keys = pygame.transform.scale(number_keys, number_keys_size)
                 # wasd and arrow keys positions
                 number_keys_pos = (350, 380)

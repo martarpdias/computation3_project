@@ -4,7 +4,11 @@ from game_story import *
 def main():
     #story()
 
+    #story()
+
     interface()
+
+
 
 
 
