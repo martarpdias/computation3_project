@@ -3,24 +3,31 @@ import math
 import pygame
 import random
 
-from shed import shed
+from map import map
 from enemy import *
 from player import Player
 from bullet import Bullet
 from invicibility import Invincibility
 from deSpawner import DeSpawner
 from velocity import Velocity
+from chests import Chest
+
 
 
 def game_loop():
+
     player = Player()
     current_state = "main"
+    screen = pygame.display.set_mode((resolution))
 
     while True:
         if current_state == "main":
             current_state = execute_game(player)
-        elif current_state == "shed":
-            current_state = shed(player)
+        elif current_state == "map":
+            current_state = map(player)
+        
+
+
 
 def execute_game(player: Player):
     """
@@ -29,20 +36,19 @@ def execute_game(player: Player):
     # Clock for controlling the frame rate
     clock = pygame.time.Clock()
 
+    resolution=(1200,600)
     # Setting up the screen and background
     screen = pygame.display.set_mode((resolution))
-
     background = pygame.image.load("game_background.jpg")
     background = pygame.transform.scale(background, (width, height))
 
     # Player setup
     player_group = pygame.sprite.Group()
     player_group.add(player)
-    score = 0
 
-    #Initialize bullets
-    bullets=pygame.sprite.Group()
-    enemy_bullets=pygame.sprite.Group()
+    # Initialize bullets
+    bullets = pygame.sprite.Group()
+    enemy_bullets = pygame.sprite.Group()
 
     # Initialize the enemy group
     enemies = pygame.sprite.Group()
@@ -52,6 +58,11 @@ def execute_game(player: Player):
     power_ups = pygame.sprite.Group()
     power_up_spawn_timer = 0
 
+    #Initialize chests and set a delay of 10 seconds for the spawn
+    chests = pygame.sprite.Group()
+    chest_spwan_delay = 10000
+    last_chest_spwan_time = pygame.time.get_ticks()
+
     # Round management
     current_round = 1
     final_round = 10
@@ -60,6 +71,9 @@ def execute_game(player: Player):
 
     # Initialize lists for active power-ups
     active_power_ups = []
+    # Bullet type management
+    selected_bullet_type = 1  # Default bullet type
+    shooting_timer = 0
 
     running = True
     while running:
@@ -68,6 +82,37 @@ def execute_game(player: Player):
 
         # Draw the background
         screen.blit(background, (0, 0))
+
+        # Event handling
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                return
+
+            # Detect key presses for bullet selection
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_1:
+                    selected_bullet_type = 1  # Normal bullet
+                elif event.key == pygame.K_2:
+                    selected_bullet_type = 2  # Fast bullet
+                elif event.key == pygame.K_3:
+                    selected_bullet_type = 3  # Large bullet
+
+        # automatic shooting
+        if shooting_timer <= 0:  # Shoot every few frames
+            directions = [math.radians(0), math.radians(90), math.radians(180), math.radians(270)]
+
+            for direction in directions:
+                bullet = shoot_bullet(player.rect.centerx, player.rect.centery, direction, selected_bullet_type)
+                bullets.add(bullet)
+
+            shooting_timer = fps // 2  # Adjust shooting rate
+
+        shooting_timer -= 0.5  # Decrement the shooting timer
+        # Update and draw bullets
+        bullets.update()
+        for bullet in bullets:
+            bullet.draw(screen)
 
         # Calculate remaining time
         elapsed_time = (pygame.time.get_ticks() - start_time) / 1000  # Time in seconds
@@ -107,16 +152,11 @@ def execute_game(player: Player):
                 power_up.remove_effects(player, locals())  # Remove power-up effects
                 active_power_ups.remove(power_up)  # Remove from active list
 
-    
-
-        
-        
         # Update power-ups
         power_ups.update()
 
         # Draw power-ups
         power_ups.draw(screen)
-
 
 
         # Calculate the width of the time bar
@@ -130,6 +170,7 @@ def execute_game(player: Player):
         else:
             bar_color = (255, 0, 0)  # Red
 
+
         # Add rounded corners to the time bar
         pygame.draw.rect(screen, (255, 255, 255), (20, height - 40, width - 40, 25), border_radius=10)  # Background bar
         pygame.draw.rect(screen, bar_color, (30, height - 35, bar_width, 15), border_radius=10)  # Time bar with rounded corners
@@ -141,18 +182,23 @@ def execute_game(player: Player):
 
         if elapsed_time >= round_time:
             # Show transition screen
-            show_transition_screen(screen)
+            result = show_transition_screen(screen, current_round, lambda: map(player))
+            if result == "next_round":
+                # Proceed to the next round
+                start_time = pygame.time.get_ticks()
+                current_round += 1
+                player.health = min(100, int(player.health + player.health / 3))
+                for enemy in enemies:
+                    enemy.kill()
+                for bullet in bullets:
+                    bullet.kill()
+                for power_up in power_ups:
+                    power_up.kill()
+            elif result == "map":
+                # Handle map-related logic
+                return "map"
 
-            # Reset the timer and increase difficulty
-            start_time = pygame.time.get_ticks()
-            current_round += 1
-            player.health = min(100, int(player.health + player.health/3))  # Reset player health
-            for enemy in enemies:
-                enemy.kill()
-            for bullet in bullets:
-                bullet.kill()
-            for power_up in power_ups:
-                power_up.kill()
+
         
         # Enemy spawning according to the round
         if enemy_spawn_timer<=0:
@@ -202,6 +248,18 @@ def execute_game(player: Player):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
+            # Switch guns
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_1:
+                    player.switch_guns("pistol")
+                elif event.key == pygame.K_2:
+                    player.switch_guns("rifle")
+                elif event.key == pygame.K_3:
+                    player.switch_guns("shotgun")
+                elif event.key == pygame.K_4:
+                    player.switch_guns("RPG")
+                elif event.key == pygame.K_ESCAPE:
+                    pause(screen, width, height)
 
         for enemy in enemies:
             if isinstance(enemy, shooter_rastreio):
@@ -212,15 +270,42 @@ def execute_game(player: Player):
         player.shoot(bullets)
 
         
+
+        #Spawning the chests
+        current_time = pygame.time.get_ticks()
+        if current_time - last_chest_spwan_time > chest_spwan_delay:
+            if random.random() < 0.05:
+                new_chest = Chest()
+                new_chest.spawner()
+                chests.add(new_chest)
+                last_chest_spwan_time = current_time
+
+
+        #spawning the enemies
+        if enemy_spawn_timer<=0:
+            enemy_type = random.choice([Enemy, fast_enemy, shooter_rastreio])
+            new_enemy = enemy_type()
+            enemies.add(new_enemy)
+            enemy_spawn_timer = enemy_spawn_rate
+
         # Checking for collisions between bullets and enemies
         for bullet in bullets:
-            collided_enemies = pygame.sprite.spritecollide(bullet, enemies, False)
-            for enemy in collided_enemies:
-                enemy.health -= 5  # Decrease health by 5 for each hit
-                bullet.kill()  # Destroy the bullet
-                if enemy.health <= 0:
-                    enemy.kill()  # Destroy the enemy
-                    score += 100
+            if isinstance(bullet, RPG_rocket):
+                collided_enemies = pygame.sprite.spritecollide(bullet, enemies, False)
+                if collided_enemies:
+                    bullet.explosion(enemies)
+                    bullet.kill()
+                    
+            else:
+                collided_enemies = pygame.sprite.spritecollide(bullet, enemies, False)            
+                for enemy in collided_enemies:
+                    enemy.health -= bullet.damage  # Decrease health by bullet damage
+                    print(f"Health after damage: {enemy.health}")
+                    bullet.kill()  # Destroy the bullet
+                    if enemy.health <= 0:
+                        print(f"{type(enemy)} killed!")
+                        enemy.kill()  # Destroy the enemy
+                        player.coins += enemy.coin_value # Add coins to the player
 
         # Checking for collisions between bullets and players
         for bullet in enemy_bullets:
@@ -231,12 +316,18 @@ def execute_game(player: Player):
             elif player.invincible == True and collided_player:
                 bullet.kill()
 
+        #check for collision between chest and player
+        collided_chest = pygame.sprite.spritecollide(player, chests, False)
+        for chest in collided_chest:
+                rewards = chest.open()
+                if rewards:
+                    selected_reward = chest.display_rewards_options(screen, rewards, player, enemies)
+                   
+        chests.draw(screen)
 
-        # Update positions
-        player_group.update()
-        bullets.update()
-        enemies.update(player)
-        enemy_bullets.update()
+        # Update the enemy spawn timer
+        enemy_spawn_timer -= 1
+
 
         # Check collisions between player and enemies
         collided_enemies = pygame.sprite.spritecollide(player, enemies, False)
@@ -244,15 +335,19 @@ def execute_game(player: Player):
             enemy.deal_damage(player)
 
 
+        #check if the player's fire rate inrease has expired
+        player.check_fire_rate_increase()
+
+        player_group.update()
 
         # Check if the player is dead
         if player.health <= 0:
             show_game_over_screen(screen)
     
         # Checking if the user goes into the shed area
-        if player.rect.right >= width:
+        '''if player.rect.right >= width:
             # Change the game state to shed
-            return "shed"
+            return "shed"'''
 
         # Draw game objects
         player_group.draw(screen)
@@ -265,17 +360,21 @@ def execute_game(player: Player):
         # Draw health bars for enemies
         enemy_health_bar_max_width = 50  # Maximum width of the health bar
         for enemy in enemies:
-            enemy_health_bar_width = int((enemy.health / enemy.max_health) * enemy_health_bar_max_width)  # Scale enemy health to the max width
+            enemy_health_bar_width = int(
+                (enemy.health / enemy.max_health) * enemy_health_bar_max_width)  # Scale enemy health to the max width
             pygame.draw.rect(screen, (255, 0, 0), (enemy.rect.x, enemy.rect.y - 10, 50, 5))  # Background bar
-            pygame.draw.rect(screen, (0, 255, 0), (enemy.rect.x, enemy.rect.y - 10, enemy_health_bar_width, 5))  # Enemy health bar
+            pygame.draw.rect(screen, (0, 255, 0),
+                             (enemy.rect.x, enemy.rect.y - 10, enemy_health_bar_width, 5))  # Enemy health bar
 
-        # Display the score
-        score_text = font.render(f"Score: {score}", True, (255, 255, 255))  # White text
-        screen.blit(score_text, (295, 45))  # Display the score at the top-left corner
+        # Display the coins
+        coins_text = font.render(f"Coins: {player.coins}", True, (255, 255, 255))  # White text
+        screen.blit(coins_text, (295, 45))  # Display the coins at the top-left corner
 
         # Update groups
         player_group.update()
         bullets.update()
+        boss = Boss()
+        boss.update(player, enemies)
         enemies.update(player)
         power_ups.update()
 
@@ -286,33 +385,99 @@ def execute_game(player: Player):
         for bullet in bullets:
             bullet.draw(screen)
 
-        # Display the score
-        score_text = font.render(f"Score: {score}", True, (255, 255, 255))
-        screen.blit(score_text, (295, 45))
 
         # Update the display
         pygame.display.flip()
 
-
-def show_transition_screen(screen):
-    screen.fill((0, 0, 0))
-    font = pygame.font.SysFont("segoeuiblack", 50)
-    text = font.render("Round completed!", True, (255, 255, 255))
+#pause game function
+def pause(screen, width, height):
+    screen = pygame.display.set_mode((resolution))
+    font = pygame.font.SysFont("segoeuiblack", 100)
+    text = font.render("Paused", True, (255, 255, 255))
     text_rect = text.get_rect(center=(width // 2, height // 2))
+    # Display the text at the center
     screen.blit(text, text_rect)
+    pygame.display.flip()
+
+    #loop to keep the game paused until the player unpauses
+    paused = True
+    while paused:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    paused = False        
+        
+
+
+def show_transition_screen(screen, current_round, map_callback=None):
+    overlay = pygame.Surface((width, height), pygame.SRCALPHA)
+    overlay.fill((0, 0, 0, 128))  # Semi-transparent overlay
+    screen.blit(overlay, (0, 0))
+
+    # Title
+    font = pygame.font.SysFont("segoeuiblack", 50)
+    title_text = font.render(f"End of Round {current_round}", True, (255, 255, 255))
+    title_rect = title_text.get_rect(center=(width // 2, height // 3))
+    screen.blit(title_text, title_rect)
+
+    # Buttons
+    button_width, button_height = 200, 60
+    button_spacing = 50
+    next_button_rect = pygame.Rect(
+        (width // 2 - button_width - button_spacing // 2, height // 2),
+        (button_width, button_height),
+    )
+    map_button_rect = pygame.Rect(
+        (width // 2 + button_spacing // 2, height // 2),
+        (button_width, button_height),
+    )
+
+    # Render Buttons
+    button_font = pygame.font.SysFont("segoeuiblack", 30)
+    next_text = button_font.render("Next Round", True, (255, 255, 255))
+    next_text_rect = next_text.get_rect(center=next_button_rect.center)
+    map_text = button_font.render("Map", True, (255, 255, 255))
+    map_text_rect = map_text.get_rect(center=map_button_rect.center)
+
+    pygame.draw.rect(screen, (255, 0, 0), next_button_rect, border_radius=10)
+    pygame.draw.rect(screen, (0, 0, 255), map_button_rect, border_radius=10)
+    screen.blit(next_text, next_text_rect)
+    screen.blit(map_text, map_text_rect)
+
     pygame.display.update()
-    pygame.time.wait(2000)
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if next_button_rect.collidepoint(event.pos):
+                    return "next_round"
+                if map_button_rect.collidepoint(event.pos):
+                    if map_callback:  # Call the map callback if provided
+                        map_callback()
+                    return "map"
+
+
+
+
 
 def show_game_over_screen(screen):
     screen.fill((0, 0, 0))
     font = pygame.font.SysFont("segoeuiblack", 50)
+
+    #Display text
     text = font.render("Game Over!", True, (255, 255, 255))
     text_rect = text.get_rect(center=(resolution[0] // 2, resolution[1] // 2))
     screen.blit(text, text_rect)
-
+    
     # Restart button
     restart_button = pygame.Rect(resolution[0] // 2 - 100, resolution[1] // 2 + 100, 200, 50)
     pygame.draw.rect(screen, (255, 0, 0), restart_button)
+
     font = pygame.font.SysFont("segoeuiblack", 30)
     restart_text = font.render("Restart", True, (255, 255, 255))
     restart_text_rect = restart_text.get_rect(center=restart_button.center)
